@@ -33,47 +33,46 @@ MovieFinder is a lightweight web application designed to help users discover mov
 ### Technology Stack:
 - **Backend**: Java EE (Servlets, JSP), JDBC for database interaction.
 - **Frontend**: Basic HTML/CSS for UI, focusing on functionality over aesthetics.
-- **Database**: PostgreSQL or MySQL for persistent storage of user data, movie information, and reviews.
+- **Database**: PostgreSQL for persistent storage of user data, movie information, and reviews.
 - **API Integration**: TMDB API for fetching movie data.
 - **Application Server**: Apache Tomcat for hosting the Java EE application.
-- **Dependencies Management**: Apache Maven for handling project dependencies.
 - **JSON Parsing**: Libraries like Gson or Jackson for processing API responses.
 
 ### Development Plan:
-#### **1. Setting up the environment and database (1 day)**  
+#### **1. Setting up the environment and database (0.7 - 1 day)**  
    - Install and configure Tomcat and PostgreSQL/MySQL.  
    - Implement the database schema.  
    - Establish a connection between the application and the database using JDBC.  
 
-#### **2. Project structure setup (2 days)**  
+#### **2. Project structure setup (1 days)**  
    - Create a Maven project and define dependencies.  
    - Set up the basic folder structure for Servlets and other components.  
 
-#### **3. User authentication (2 days)**  
+#### **3. User authentication (1.3 days)**  
    - Implement registration and login functionality.  
    - Configure session management for users.  
 
-#### **4. TMDB API integration (2 days)**  
+#### **4. TMDB API integration (1 - 1.3 days)**  
    - Set up communication with the TMDB API for searching movies.  
    - Implement JSON parsing for API responses.  
 
-#### **5. Watchlists (2 days)**  
+#### **5. Watchlists (1.5 - 2 days)**  
    - Create functionality for adding movies to "Want to Watch" and "Watched" lists.  
    - Display the lists on the user dashboard.  
 
-#### **6. Ratings and reviews (3 days)**  
+#### **6. Ratings and reviews (2 - 3 days)**  
    - Implement CRUD operations for user reviews and ratings.  
    - Aggregate ratings and display reviews on the movie pages.  
 
-#### **7. Movie details page (1-2 days)**  
+#### **7. Movie details page (1 - 1.5 days)**  
    - Design a page for displaying movie information, including reviews and ratings.  
 
 #### **8. Optional features (if time permits)**  
-   - **Recommendations (3 days)**: Implement a simple algorithm to suggest movies based on user activity.  
-   - **Playlists (2 days)**: Allow users to create and manage custom playlists.  
+   - **Recommendations (2 - 3 days)**: Implement a simple algorithm to suggest movies based on user activity.  
+   - **Playlists (1 days)**: Allow users to create and manage custom playlists.  
    - **Random Movie Picker (1 day)**: Add a feature to display a random movie.  
 
-#### **9. Testing and debugging (2 days)**  
+#### **9. Testing and debugging (2 - 3 days)**  
    - Perform thorough testing of all application components.  
    - Fix any identified bugs and refine functionality.  
 
