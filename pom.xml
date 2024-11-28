@@ -35,14 +35,34 @@
         <artifactId>junit-jupiter-engine</artifactId>
         <version>${junit.version}</version>
         <scope>test</scope>
-      </dependency>  </dependencies>
+      </dependency>
+
+      <!-- https://mvnrepository.com/artifact/org.postgresql/postgresql -->
+      <dependency>
+          <groupId>org.postgresql</groupId>
+          <artifactId>postgresql</artifactId>
+          <version>42.7.4</version>
+      </dependency>
+
+
+  </dependencies>
 
   <build>
-    <plugins>
-<plugin>
+      <resources>
+          <resource>
+              <directory>src/main/resources</directory>
+              <includes>
+                  <include>**/*</include>
+              </includes>
+          </resource>
+      </resources>
+
+      <plugins>
+        <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-war-plugin</artifactId>
         <version>3.4.0</version>
-      </plugin>    </plugins>
+       </plugin>
+    </plugins>
   </build>
 </project>
