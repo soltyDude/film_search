@@ -37,12 +37,22 @@
         <scope>test</scope>
       </dependency>
 
-      <!-- https://mvnrepository.com/artifact/org.postgresql/postgresql -->
       <dependency>
           <groupId>org.postgresql</groupId>
           <artifactId>postgresql</artifactId>
-          <version>42.7.4</version>
+          <version>42.6.0</version>
       </dependency>
+
+
+      <!-- https://mvnrepository.com/artifact/org.mindrot/jbcrypt -->
+      <!--for pasword crypting-->
+      <dependency>
+          <groupId>org.mindrot</groupId>
+          <artifactId>jbcrypt</artifactId>
+          <version>0.4</version>
+      </dependency>
+
+
 
 
   </dependencies>

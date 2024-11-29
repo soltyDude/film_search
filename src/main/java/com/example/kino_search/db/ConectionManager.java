@@ -15,7 +15,10 @@ public class ConectionManager {
     public static Connection getConnection() {
         if (connection == null) {
             try {
-                // Получаем параметры подключения из PropertyManager
+                // Загрузка драйвера вручную
+                Class.forName("org.postgresql.Driver");
+
+                // Получаем параметры подключения
                 String url = PropertyManager.getProperty("db.url");
                 String user = PropertyManager.getProperty("db.username");
                 String password = PropertyManager.getProperty("db.password");
@@ -24,6 +27,9 @@ public class ConectionManager {
                 connection = DriverManager.getConnection(url, user, password);
                 logger.info("Connection to the database established successfully");
 
+            } catch (ClassNotFoundException e) {
+                logger.log(Level.SEVERE, "PostgreSQL Driver not found", e);
+                throw new RuntimeException("PostgreSQL Driver not found", e);
             } catch (SQLException e) {
                 logger.log(Level.SEVERE, "Failed to connect to the database", e);
                 throw new RuntimeException("Error connecting to the database", e);
@@ -33,6 +39,7 @@ public class ConectionManager {
         }
         return connection;
     }
+
 
     public static void closeConnection() {
         try {
