@@ -39,42 +39,48 @@ MovieFinder is a lightweight web application designed to help users discover mov
 - **JSON Parsing**: Libraries like Gson or Jackson for processing API responses.
 
 ### Development Plan:
-#### **1. Setting up the environment and database (0.7 - 1 day)**  
+#### **1. Setting up the environment and database (29.11)**  
    - Install and configure Tomcat and PostgreSQL/MySQL.  
    - Implement the database schema.  
    - Establish a connection between the application and the database using JDBC.  
 
-#### **2. Project structure setup (1 days)**  
+#### **2. Project structure setup (30.11)**  
    - Create a Maven project and define dependencies.  
    - Set up the basic folder structure for Servlets and other components.  
 
-#### **3. User authentication (1.3 days)**  
+#### **3. User authentication (1.12)**  
    - Implement registration and login functionality.  
    - Configure session management for users.  
 
-#### **4. TMDB API integration (1 - 1.3 days)**  
+#### **4. TMDB API integration (2.12 - 3.12)**  
    - Set up communication with the TMDB API for searching movies.  
    - Implement JSON parsing for API responses.  
 
-#### **5. Watchlists (1.5 - 2 days)**  
+#### **5. Watchlists (5.12)**  
    - Create functionality for adding movies to "Want to Watch" and "Watched" lists.  
    - Display the lists on the user dashboard.  
 
-#### **6. Ratings and reviews (2 - 3 days)**  
+#### **6. Ratings and reviews (8.12)**  
    - Implement CRUD operations for user reviews and ratings.  
    - Aggregate ratings and display reviews on the movie pages.  
 
-#### **7. Movie details page (1 - 1.5 days)**  
-   - Design a page for displaying movie information, including reviews and ratings.  
+#### **7. Movie details page (9.12 - 10.12)**  
+   - Design a page for displaying movie information, including reviews and ratings.
 
-#### **8. Optional features (if time permits)**  
+#### **8. create nice front(12.12)
+
+#### **9. Testing and debugging (15.12)**  
+   - Perform thorough testing of all application components.  
+   - Fix any identified bugs and refine functionality.
+
+#### **10. Finalizing the project (16.12)**  
+   - Prepare project documentation and package the application for deployment.
+
+#### **11. Optional features (if time permits)**  
    - **Recommendations (2 - 3 days)**: Implement a simple algorithm to suggest movies based on user activity.  
    - **Playlists (1 days)**: Allow users to create and manage custom playlists.  
    - **Random Movie Picker (1 day)**: Add a feature to display a random movie.  
 
-#### **9. Testing and debugging (2 - 3 days)**  
-   - Perform thorough testing of all application components.  
-   - Fix any identified bugs and refine functionality.  
 
-#### **10. Finalizing the project (1 day)**  
-   - Prepare project documentation and package the application for deployment.
+
+
