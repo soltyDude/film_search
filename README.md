@@ -48,39 +48,93 @@ MovieFinder is a lightweight web application designed to help users discover mov
    - Create a Maven project and define dependencies.  
    - Set up the basic folder structure for Servlets and other components.  
 
-#### **3. User authentication (1.12)**  
-   - Implement registration and login functionality.  
-   - Configure session management for users.  
+### 3. **User authentication (1.12)**  
+- **User registration**:  
+  - Create a registration form (HTML + CSS).  
+  - Implement data validation (both client-side and server-side).  
+  - Save user data in the database with password hashing (e.g., using `BCrypt`).  
+- **User login**:  
+  - Create a login form.  
+  - Implement user authentication with password verification.  
+  - Handle invalid login/password cases.  
+- **Session management**:  
+  - Configure `HttpSession` to store current user information.  
+  - Add logic for logging out users.  
 
-#### **4. TMDB API integration (2.12 - 3.12)**  
-   - Set up communication with the TMDB API for searching movies.  
-   - Implement JSON parsing for API responses.  
+### 4. **TMDB API integration (2.12 - 3.12)**  
+- **API connection**:  
+  - Register on TMDB and obtain an API key.  
+  - Develop a utility class for sending HTTP requests to the TMDB API.  
+- **Movie search**:  
+  - Add functionality for searching movies by keywords.  
+  - Implement JSON response parsing (using `Gson` or `Jackson`).  
+- **Request caching (optional)**:  
+  - Implement caching for storing results of popular queries.  
+  - Set up a timer to clear the cache at regular intervals.  
 
-#### **5. Watchlists (5.12)**  
-   - Create functionality for adding movies to "Want to Watch" and "Watched" lists.  
-   - Display the lists on the user dashboard.  
+### 5. **Watchlists (5.12)**  
+- **List creation**:  
+  - Develop database tables to store user watchlists.  
+  - Implement DAO classes to add and remove movies from watchlists.  
+- **Adding movies to watchlists**:  
+  - Add "Want to Watch" and "Watched" buttons on the movie page.  
+  - Configure request handling through servlets.  
+- **Displaying watchlists**:  
+  - Create a user dashboard page.  
+  - Implement logic for displaying "Want to Watch" and "Watched" movies on the dashboard.  
 
-#### **6. Ratings and reviews (8.12)**  
-   - Implement CRUD operations for user reviews and ratings.  
-   - Aggregate ratings and display reviews on the movie pages.  
+### 6. **Ratings and reviews (8.12)**  
+- **Movie ratings**:  
+  - Create a form for submitting ratings (stars/slider).  
+  - Save ratings in the database.  
+  - Display the average rating on the movie page.  
+- **Reviews**:  
+  - Add a form for submitting reviews.  
+  - Implement CRUD operations:  
+    - Create, edit, delete reviews.  
+  - Display all reviews on the movie page.  
 
-#### **7. Movie details page (9.12 - 10.12)**  
-   - Design a page for displaying movie information, including reviews and ratings.
+### 7. **Movie details page (9.12 - 10.12)**  
+- **Core movie information**:  
+  - Display movie title, poster, description, and genres.  
+- **Integration with reviews and ratings**:  
+  - Add a section for user reviews.  
+  - Display the average and individual user ratings.  
+- **API integration**:  
+  - Use TMDB API data for additional information (e.g., trailers, cast).  
+- **Page design**:  
+  - Style the page elements with CSS.  
 
-#### **8. create nice front(12.12)
+### 8. **Creating an attractive interface (12.12)**  
+- Connect a CSS framework (e.g., Bootstrap or TailwindCSS).  
+- Develop:  
+  - A homepage with search functionality.  
+  - Intuitive navigation between pages.  
+  - Dark/light theme support (optional).  
 
-#### **9. Testing and debugging (15.12)**  
-   - Perform thorough testing of all application components.  
-   - Fix any identified bugs and refine functionality.
+### 9. **Testing and debugging (15.12)**  
+- Test all components:  
+  - Unit tests for DAO and service classes.  
+  - Integration tests for database and API interactions.  
+- Test the user interface:  
+  - Check all forms and navigation flows.  
+  - Fix display issues and errors.  
+- Bug tracking:  
+  - Create a list of identified issues.  
+  - Fix critical and minor bugs.  
 
-#### **10. Finalizing the project (16.12)**  
-   - Prepare project documentation and package the application for deployment.
+### 10. **Finalizing the project (16.12)**  
+- **Documentation**:  
+  - Write a description of application functionality.  
+  - Provide installation and deployment instructions.  
+- **Project packaging**:  
+  - Package the project into a WAR file.  
+  - Deploy it to Tomcat and test thoroughly.  
 
-#### **11. Optional features (if time permits)**  
-   - **Recommendations (2 - 3 days)**: Implement a simple algorithm to suggest movies based on user activity.  
-   - **Playlists (1 days)**: Allow users to create and manage custom playlists.  
-   - **Random Movie Picker (1 day)**: Add a feature to display a random movie.  
-
-
-
-
+### 11. **Optional features**  
+- **Recommendations (2-3 days)**:  
+  - Implement a basic recommendation algorithm (e.g., based on popular movies or genres).  
+- **Playlists (1 - 2 day)**:  
+  - Add functionality for creating and managing custom playlists with filters.  
+- **Random Movie Picker (1 day)**:  
+  - Add a button to select a random movie from the user's lists.  
