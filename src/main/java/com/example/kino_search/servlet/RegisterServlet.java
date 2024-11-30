@@ -29,21 +29,35 @@ public class RegisterServlet extends HttpServlet {
             return;
         }
 
+        // Хешируем пароль
         String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
 
         try (Connection conn = ConectionManager.getConnection()) {
-            String sql = "INSERT INTO users (nickname, email, password, created_at) VALUES (?, ?, ?, NOW())";
-            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            // Проверяем, существует ли email в базе
+            String checkEmailSql = "SELECT COUNT(*) FROM users WHERE email = ?";
+            try (PreparedStatement checkStmt = conn.prepareStatement(checkEmailSql)) {
+                checkStmt.setString(1, email);
+                try (var rs = checkStmt.executeQuery()) {
+                    if (rs.next() && rs.getInt(1) > 0) {
+                        response.getWriter().write("Email is already in use!");
+                        return;
+                    }
+                }
+            }
+
+            // Если email не найден, добавляем пользователя
+            String insertSql = "INSERT INTO users (nickname, email, password, created_at) VALUES (?, ?, ?, NOW())";
+            try (PreparedStatement stmt = conn.prepareStatement(insertSql)) {
                 stmt.setString(1, nickname);
                 stmt.setString(2, email);
                 stmt.setString(3, hashedPassword);
                 stmt.executeUpdate();
                 response.getWriter().write("User registered successfully!");
+                response.sendRedirect("dashboard.jsp");
             }
         } catch (SQLException e) {
             e.printStackTrace();
             response.getWriter().write("Error: " + e.getMessage());
-            System.out.println("bbbbbbbbbbbbbbbbbbbbbbbbbbbb");
         }
     }
 }

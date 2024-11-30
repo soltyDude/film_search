@@ -4,6 +4,7 @@
          xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
          version="6.0">
 
+    <!-- Register Servlet -->
     <servlet>
         <servlet-name>RegisterServlet</servlet-name>
         <servlet-class>com.example.kino_search.servlet.RegisterServlet</servlet-class>
@@ -13,6 +14,7 @@
         <url-pattern>/register</url-pattern>
     </servlet-mapping>
 
+    <!-- Login Servlet -->
     <servlet>
         <servlet-name>LoginServlet</servlet-name>
         <servlet-class>com.example.kino_search.servlet.LoginServlet</servlet-class>
@@ -21,4 +23,21 @@
         <servlet-name>LoginServlet</servlet-name>
         <url-pattern>/login</url-pattern>
     </servlet-mapping>
+
+    <!-- Logout Servlet -->
+    <servlet>
+        <servlet-name>LogoutServlet</servlet-name>
+        <servlet-class>com.example.kino_search.servlet.LogoutServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>LogoutServlet</servlet-name>
+        <url-pattern>/logout</url-pattern>
+    </servlet-mapping>
+
+    <!-- Welcome File -->
+    <welcome-file-list>
+        <welcome-file>index.jsp</welcome-file>
+    </welcome-file-list>
+
+
 </web-app>

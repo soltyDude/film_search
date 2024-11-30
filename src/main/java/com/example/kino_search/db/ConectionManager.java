@@ -13,30 +13,26 @@ public class ConectionManager {
     private static Connection connection;
 
     public static Connection getConnection() {
-        if (connection == null) {
-            try {
-                // Загрузка драйвера вручную
-                Class.forName("org.postgresql.Driver");
-
-                // Получаем параметры подключения
+        try {
+            if (connection == null || connection.isClosed()) {
+                // Получаем параметры подключения из PropertyManager
                 String url = PropertyManager.getProperty("db.url");
                 String user = PropertyManager.getProperty("db.username");
                 String password = PropertyManager.getProperty("db.password");
 
-                // Устанавливаем соединение
+                // Создаем новое соединение
+                Class.forName("org.postgresql.Driver");
                 connection = DriverManager.getConnection(url, user, password);
                 logger.info("Connection to the database established successfully");
-
-            } catch (ClassNotFoundException e) {
-                logger.log(Level.SEVERE, "PostgreSQL Driver not found", e);
-                throw new RuntimeException("PostgreSQL Driver not found", e);
-            } catch (SQLException e) {
-                logger.log(Level.SEVERE, "Failed to connect to the database", e);
-                throw new RuntimeException("Error connecting to the database", e);
+            } else {
+                logger.info("Reusing existing database connection");
             }
-        } else {
-            logger.info("Reusing existing database connection");
-        }
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Failed to connect to the database", e);
+            throw new RuntimeException("Error connecting to the database", e);
+        } catch (ClassNotFoundException e) {
+            logger.log(Level.SEVERE, "PostgreSQL Driver not found", e);
+            throw new RuntimeException("PostgreSQL Driver not found", e);        }
         return connection;
     }
 
