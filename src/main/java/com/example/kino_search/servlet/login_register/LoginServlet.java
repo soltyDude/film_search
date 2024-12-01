@@ -1,11 +1,10 @@
-package com.example.kino_search.servlet;
+package com.example.kino_search.servlet.login_register;
 
 import jakarta.servlet.http.HttpSession;
 import org.mindrot.jbcrypt.BCrypt;
 import com.example.kino_search.db.ConectionManager;
 
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
