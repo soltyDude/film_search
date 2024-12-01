@@ -39,5 +39,15 @@
         <welcome-file>index.jsp</welcome-file>
     </welcome-file-list>
 
+    <!-- ыуфкср -->
+    <servlet>
+        <servlet-name>SearchServlet</servlet-name>
+        <servlet-class>com.example.kino_search.servlet.dashboard.SearchServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SearchServlet</servlet-name>
+        <url-pattern>/search</url-pattern>
+    </servlet-mapping>
+
 
 </web-app>
