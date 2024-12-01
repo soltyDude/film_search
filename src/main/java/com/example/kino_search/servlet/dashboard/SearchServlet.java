@@ -1,7 +1,6 @@
 package com.example.kino_search.servlet.dashboard;
 
 import com.example.kino_search.util.TMDBApiUtil;
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import jakarta.servlet.ServletException;
@@ -14,7 +13,6 @@ import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
-
 
 public class SearchServlet extends HttpServlet {
 
@@ -32,11 +30,9 @@ public class SearchServlet extends HttpServlet {
 
         try {
             String endpoint = "/search/movie?query=" + query;
-            String jsonResponse = TMDBApiUtil.sendRequest(endpoint);
+            JsonObject jsonObject = TMDBApiUtil.sendRequest(endpoint);
 
-            // Парсим JSON-ответ
-            Gson gson = new Gson();
-            JsonObject jsonObject = gson.fromJson(jsonResponse, JsonObject.class);
+            // Получаем массив результатов
             JsonArray results = jsonObject.getAsJsonArray("results");
 
             // Преобразуем JSON в список фильмов
@@ -44,6 +40,7 @@ public class SearchServlet extends HttpServlet {
             for (int i = 0; i < results.size(); i++) {
                 JsonObject movie = results.get(i).getAsJsonObject();
                 Map<String, String> movieData = new HashMap<>();
+                movieData.put("id", movie.get("id").getAsString()); // Убедитесь, что ID добавляется
                 movieData.put("title", movie.get("title").getAsString());
                 movieData.put("overview", movie.get("overview").getAsString());
                 movieData.put("release_date", movie.get("release_date").getAsString());
@@ -55,11 +52,13 @@ public class SearchServlet extends HttpServlet {
                     movieData.put("poster_url", ""); // Если постера нет
                 }
 
+
                 movies.add(movieData);
             }
 
-            // Передаем список фильмов на JSP
+// Передаем список фильмов на JSP
             request.setAttribute("movies", movies);
+
         } catch (Exception e) {
             request.setAttribute("error", "Failed to retrieve movies. Please try again later.");
             e.printStackTrace();

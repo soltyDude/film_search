@@ -1,39 +1,41 @@
 package com.example.kino_search.util;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class TMDBApiUtil {
 
-    private static final String API_KEY = "e28fe83118014486bd75c60ecd32ede4"; // Замените на ваш API ключ
+    private static final Logger logger = Logger.getLogger(TMDBApiUtil.class.getName());
+
+    private static final String API_KEY = "e28fe83118014486bd75c60ecd32ede4"; // Ваш API ключ
     private static final String BASE_URL = "https://api.themoviedb.org/3";
 
-    // Кэш: хранит результаты запросов и время их добавления
+    // Кэш
     private static final Map<String, CacheEntry> cache = new ConcurrentHashMap<>();
 
-    // Время жизни кэша (в миллисекундах)
+    // Время жизни кэша
     private static final long CACHE_EXPIRATION_TIME = 10 * 60 * 1000; // 10 минут
 
-    /**
-     * Отправляет GET-запрос к TMDB API и возвращает результат как строку.
-     *
-     * @param endpoint Эндпоинт API (например, "/movie/popular")
-     * @return Результат запроса в формате JSON (строка)
-     * @throws Exception Если запрос не удался
-     */
-    public static String sendRequest(String endpoint) throws Exception {
+    public static JsonObject sendRequest(String endpoint) throws Exception {
+        logger.info("Received request for endpoint: " + endpoint);
+
         // Проверяем кэш
         String cachedResponse = getFromCache(endpoint);
         if (cachedResponse != null) {
-            System.out.println("Cache hit for endpoint: " + endpoint);
-            return cachedResponse; // Возвращаем данные из кэша
+            logger.info("Cache hit for endpoint: " + endpoint);
+            return JsonParser.parseString(cachedResponse).getAsJsonObject();
         }
+
+        logger.info("Cache miss for endpoint: " + endpoint + ". Sending API request.");
 
         // Если данных в кэше нет, отправляем запрос
         String urlString = BASE_URL + endpoint + (endpoint.contains("?") ? "&" : "?") + "api_key=" + API_KEY;
@@ -43,8 +45,11 @@ public class TMDBApiUtil {
 
         int responseCode = connection.getResponseCode();
         if (responseCode != 200) {
+            logger.log(Level.SEVERE, "API request failed for endpoint: " + endpoint + " with response code: " + responseCode);
             throw new RuntimeException("HTTP GET Request Failed with Error Code: " + responseCode);
         }
+
+        logger.info("API request successful for endpoint: " + endpoint);
 
         BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
         StringBuilder response = new StringBuilder();
@@ -59,39 +64,29 @@ public class TMDBApiUtil {
         String responseString = response.toString();
         putInCache(endpoint, responseString);
 
-        return responseString;
+        logger.info("Response cached for endpoint: " + endpoint);
+        return JsonParser.parseString(responseString).getAsJsonObject();
     }
 
-    /**
-     * Получение данных из кэша, если они не устарели.
-     *
-     * @param endpoint Эндпоинт API
-     * @return Данные из кэша или null, если их нет или они устарели
-     */
     private static String getFromCache(String endpoint) {
         CacheEntry cacheEntry = cache.get(endpoint);
         if (cacheEntry != null && (System.currentTimeMillis() - cacheEntry.timestamp) <= CACHE_EXPIRATION_TIME) {
+            logger.info("Cache entry is valid for endpoint: " + endpoint);
             return cacheEntry.response;
         }
-        // Удаляем устаревший кэш
+
+        if (cacheEntry != null) {
+            logger.info("Cache expired for endpoint: " + endpoint + ". Removing from cache.");
+        }
         cache.remove(endpoint);
         return null;
     }
 
-    /**
-     * Сохраняем данные в кэш.
-     *
-     * @param endpoint Эндпоинт API
-     * @param response Ответ API
-     */
     private static void putInCache(String endpoint, String response) {
         cache.put(endpoint, new CacheEntry(response, System.currentTimeMillis()));
-        System.out.println("Cached response for endpoint: " + endpoint);
+        logger.info("Cached response for endpoint: " + endpoint);
     }
 
-    /**
-     * Внутренний класс для хранения записи кэша.
-     */
     private static class CacheEntry {
         String response;
         long timestamp;

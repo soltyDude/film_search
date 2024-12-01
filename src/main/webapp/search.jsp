@@ -1,6 +1,7 @@
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.List"%>
 <%@ page session="true" %>
+<%@ page session="true" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -44,7 +45,6 @@
             background-color: #0056b3;
         }
         .movie-list {
-            margin-top: 20px;
             display: flex;
             flex-wrap: wrap;
             gap: 20px;
@@ -56,24 +56,24 @@
         .movie-item img {
             max-width: 100%;
             border-radius: 8px;
+            cursor: pointer;
         }
         .movie-item h3 {
             font-size: 16px;
             margin: 10px 0 5px;
-        }
-        .movie-item p {
-            font-size: 14px;
-            color: #555;
         }
     </style>
 </head>
 <body>
 <div class="container">
     <h1>Search Movies</h1>
+    <!-- Форма поиска фильмов -->
     <form action="search" method="get">
         <input type="text" name="query" placeholder="Enter movie keywords" required>
         <button type="submit">Search</button>
     </form>
+
+    <!-- Список найденных фильмов -->
     <div class="movie-list">
         <%
             List<Map<String, String>> movies = (List<Map<String, String>>) request.getAttribute("movies");
@@ -81,11 +81,10 @@
                 for (Map<String, String> movie : movies) {
         %>
         <div class="movie-item">
-            <% if (!movie.get("poster_url").isEmpty()) { %>
-            <img src="<%= movie.get("poster_url") %>" alt="<%= movie.get("title") %>">
-            <% } %>
+            <a href="movie?id=<%= movie.get("id") %>">
+                <img src="<%= movie.get("poster_url") %>" alt="<%= movie.get("title") %>">
+            </a>
             <h3><%= movie.get("title") %></h3>
-            <p><%= movie.get("release_date") %></p>
         </div>
         <%
             }

@@ -39,7 +39,7 @@
         <welcome-file>index.jsp</welcome-file>
     </welcome-file-list>
 
-    <!-- ыуфкср -->
+    <!-- search -->
     <servlet>
         <servlet-name>SearchServlet</servlet-name>
         <servlet-class>com.example.kino_search.servlet.dashboard.SearchServlet</servlet-class>
@@ -48,6 +48,17 @@
         <servlet-name>SearchServlet</servlet-name>
         <url-pattern>/search</url-pattern>
     </servlet-mapping>
+
+    <!-- movi deatails -->
+    <servlet>
+        <servlet-name>MovieDetailsServlet</servlet-name>
+        <servlet-class>com.example.kino_search.servlet.dashboard.MovieDetailsServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>MovieDetailsServlet</servlet-name>
+        <url-pattern>/movie</url-pattern>
+    </servlet-mapping>
+
 
 
 </web-app>
