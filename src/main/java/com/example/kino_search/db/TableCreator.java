@@ -26,7 +26,47 @@ public class TableCreator {
             )
         """;
 
-        try (Connection connection = ConectionManager.getConnection();
+        try (Connection connection = ConnectionManager.getConnection();
+             Statement statement = connection.createStatement()) {
+
+            statement.execute(createTableSQL);
+            logger.info("Table 'film' created successfully or already exists.");
+
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error creating table 'film'", e);
+        }
+    }
+
+
+    public static void createGenreTable() {
+        String createTableSQL = """
+            CREATE TABLE genre (
+                 id SERIAL PRIMARY KEY,
+                 name VARCHAR(20) NOT NULL UNIQUE
+             )
+        """;
+
+        try (Connection connection = ConnectionManager.getConnection();
+             Statement statement = connection.createStatement()) {
+
+            statement.execute(createTableSQL);
+            logger.info("Table 'film' created successfully or already exists.");
+
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error creating table 'film'", e);
+        }
+    }
+
+    public static void createGenre_FilmTable() {
+        String createTableSQL = """
+           CREATE TABLE genre_film (
+                  id SERIAL PRIMARY KEY,
+                  genre_id INT NOT NULL REFERENCES genre(id) ON DELETE CASCADE,
+                  film_id INT NOT NULL REFERENCES film(id) ON DELETE CASCADE
+              )
+        """;
+
+        try (Connection connection = ConnectionManager.getConnection();
              Statement statement = connection.createStatement()) {
 
             statement.execute(createTableSQL);
@@ -38,6 +78,7 @@ public class TableCreator {
     }
 
     public static void main(String[] args) {
-        FilmService.fetchAndSaveFilm(550);
+        FilmService.fetchAndSaveFilm(278);
+        //createFilmTable();
     }
 }

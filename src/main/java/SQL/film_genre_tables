@@ -1,0 +1,26 @@
+CREATE TABLE film (
+    id SERIAL PRIMARY KEY,
+    api_id INT UNIQUE NOT NULL,
+    title VARCHAR(60),
+    release_date DATE,
+    poster_url TEXT,
+    runtime INT,
+    api_rating FLOAT,
+    rating FLOAT,
+    api_count INT,
+    count INT,
+    overview TEXT
+);
+
+CREATE TABLE genre (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(20) UNIQUE NOT NULL
+);
+
+CREATE TABLE genre_film (
+    id SERIAL PRIMARY KEY,
+    genre_id INT NOT NULL,
+    film_id INT NOT NULL,
+    FOREIGN KEY (genre_id) REFERENCES genre(id) ON DELETE CASCADE,
+    FOREIGN KEY (film_id) REFERENCES film(id) ON DELETE CASCADE
+);
