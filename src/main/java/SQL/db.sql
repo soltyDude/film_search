@@ -103,7 +103,7 @@ CREATE TABLE user_role (
 CREATE TABLE viewed_movies (
                                id SERIAL PRIMARY KEY,
                                viewed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-                               reviews_id INT NOT NULL,
+                               reviews_id INT DEFAULT NULL, -- Optional reviews_id
                                user_id INT NOT NULL,
                                film_id INT NOT NULL,
                                CONSTRAINT fk_viewed_movie_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
