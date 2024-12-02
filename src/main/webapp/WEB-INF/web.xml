@@ -7,7 +7,7 @@
     <!-- Register Servlet -->
     <servlet>
         <servlet-name>RegisterServlet</servlet-name>
-        <servlet-class>com.example.kino_search.servlet.RegisterServlet</servlet-class>
+        <servlet-class>com.example.kino_search.servlet.login_register.RegisterServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>RegisterServlet</servlet-name>
@@ -17,7 +17,7 @@
     <!-- Login Servlet -->
     <servlet>
         <servlet-name>LoginServlet</servlet-name>
-        <servlet-class>com.example.kino_search.servlet.LoginServlet</servlet-class>
+        <servlet-class>com.example.kino_search.servlet.login_register.LoginServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>LoginServlet</servlet-name>
@@ -27,7 +27,7 @@
     <!-- Logout Servlet -->
     <servlet>
         <servlet-name>LogoutServlet</servlet-name>
-        <servlet-class>com.example.kino_search.servlet.LogoutServlet</servlet-class>
+        <servlet-class>com.example.kino_search.servlet.login_register.LogoutServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>LogoutServlet</servlet-name>
@@ -38,6 +38,27 @@
     <welcome-file-list>
         <welcome-file>index.jsp</welcome-file>
     </welcome-file-list>
+
+    <!-- search -->
+    <servlet>
+        <servlet-name>SearchServlet</servlet-name>
+        <servlet-class>com.example.kino_search.servlet.dashboard.SearchServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SearchServlet</servlet-name>
+        <url-pattern>/search</url-pattern>
+    </servlet-mapping>
+
+    <!-- movi deatails -->
+    <servlet>
+        <servlet-name>MovieDetailsServlet</servlet-name>
+        <servlet-class>com.example.kino_search.servlet.dashboard.MovieDetailsServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>MovieDetailsServlet</servlet-name>
+        <url-pattern>/movie</url-pattern>
+    </servlet-mapping>
+
 
 
 </web-app>
