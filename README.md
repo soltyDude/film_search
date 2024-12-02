@@ -138,3 +138,11 @@ MovieFinder is a lightweight web application designed to help users discover mov
   - Add functionality for creating and managing custom playlists with filters.  
 - **Random Movie Picker (1 day)**:  
   - Add a button to select a random movie from the user's lists.  
+
+
+задачи 
+пределать дб(спросить как мне лучше хранить данные(id api или всё в дб)
+блокировку дб 
+фильмографию актёров тогда можно добавить вторую поисковую строку(поиск по актёрам)
+обновление дб(популар филмс или просто подтягивать всё из апи а зранить только списки)
+
