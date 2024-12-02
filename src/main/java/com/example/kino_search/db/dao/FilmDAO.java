@@ -16,53 +16,57 @@ public class FilmDAO {
 
     // Метод для сохранения фильма в таблицу
     public static void saveOrUpdateFilm(Film film) {
-        String sql = """
-            INSERT INTO film (api_id, title, release_date, poster_url, runtime, api_rating, rating, api_count, count, overview)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ON CONFLICT (api_id) DO UPDATE SET
-                title = EXCLUDED.title,
-                release_date = EXCLUDED.release_date,
-                poster_url = EXCLUDED.poster_url,
-                runtime = EXCLUDED.runtime,
-                api_rating = EXCLUDED.api_rating,
-                rating = EXCLUDED.rating,
-                api_count = EXCLUDED.api_count,
-                count = EXCLUDED.count,
-                overview = EXCLUDED.overview
-            RETURNING id;
-        """;
+        String sqlInsert = """
+        INSERT INTO film (api_id, title, release_date, poster_url, runtime, api_rating, rating, api_count, count, overview)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT (api_id) DO UPDATE SET
+            title = EXCLUDED.title,
+            release_date = EXCLUDED.release_date,
+            poster_url = EXCLUDED.poster_url,
+            runtime = EXCLUDED.runtime,
+            api_rating = EXCLUDED.api_rating,
+            rating = EXCLUDED.rating,
+            api_count = EXCLUDED.api_count,
+            count = EXCLUDED.count,
+            overview = EXCLUDED.overview
+    """;
 
-        try (Connection conn = ConnectionManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        String sqlSelect = "SELECT id FROM film WHERE api_id = ?";
 
-            // Заполняем параметры
-            stmt.setInt(1, film.getApiId());
-            stmt.setString(2, film.getTitle());
-            stmt.setDate(3, film.getReleaseDate());
-            stmt.setString(4, film.getPosterUrl());
-            stmt.setInt(5, film.getRuntime());
-            stmt.setFloat(6, film.getApiRating());
-            stmt.setFloat(7, film.getRating());
-            stmt.setInt(8, film.getApiCount());
-            stmt.setInt(9, film.getCount());
-            stmt.setString(10, film.getOverview());
+        try (Connection conn = ConnectionManager.getConnection()) {
+            // Вставка или обновление
+            try (PreparedStatement stmt = conn.prepareStatement(sqlInsert)) {
+                stmt.setInt(1, film.getApiId());
+                stmt.setString(2, film.getTitle());
+                stmt.setDate(3, film.getReleaseDate());
+                stmt.setString(4, film.getPosterUrl());
+                stmt.setInt(5, film.getRuntime());
+                stmt.setFloat(6, film.getApiRating());
+                stmt.setFloat(7, film.getRating());
+                stmt.setInt(8, film.getApiCount());
+                stmt.setInt(9, film.getCount());
+                stmt.setString(10, film.getOverview());
+                stmt.executeUpdate();
+            }
 
-            logger.info("Executing query to save or update film: " + film.getTitle());
-
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                int filmId = rs.getInt("id");
-                film.setId(filmId); // Устанавливаем ID для объекта Film
-                logger.info("Film saved or updated successfully. Film ID: " + filmId);
-            } else {
-                logger.severe("Query did not return any results for film: " + film.getTitle());
-                throw new SQLException("Query did not return any results.");
+            // Получение ID после обновления
+            try (PreparedStatement stmt = conn.prepareStatement(sqlSelect)) {
+                stmt.setInt(1, film.getApiId());
+                ResultSet rs = stmt.executeQuery();
+                if (rs.next()) {
+                    film.setId(rs.getInt("id"));
+                    logger.info("Film ID retrieved: " + film.getId());
+                } else {
+                    logger.severe("Failed to retrieve Film ID after insert/update for API ID: " + film.getApiId());
+                    throw new SQLException("Failed to retrieve Film ID.");
+                }
             }
 
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Error occurred while saving or updating film: " + film.getTitle(), e);
         }
     }
+
 
     public static Film getFilmByApiId(int apiId) {
         String sql = "SELECT * FROM film WHERE api_id = ?";

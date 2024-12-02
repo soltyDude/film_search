@@ -15,40 +15,33 @@ public class GenreDAO {
 
     // Сохранение или получение жанра по имени
     public static int saveOrGetGenreId(String genreName) {
-        logger.info("Starting process to save or retrieve Genre ID for genre: " + genreName);
+        String sqlInsert = "INSERT INTO genre (name) VALUES (?) ON CONFLICT (name) DO NOTHING";
+        String sqlSelect = "SELECT id FROM genre WHERE name = ?";
 
-        String selectSql = "SELECT id FROM genre WHERE name = ?";
-        String insertSql = "INSERT INTO genre (name) VALUES (?) RETURNING id";
-
-        try (Connection conn = ConnectionManager.getConnection();
-             PreparedStatement selectStmt = conn.prepareStatement(selectSql)) {
-
-            // Проверяем, существует ли жанр
-            logger.info("Checking if genre exists in database: " + genreName);
-            selectStmt.setString(1, genreName);
-            ResultSet rs = selectStmt.executeQuery();
-            if (rs.next()) {
-                int genreId = rs.getInt("id");
-                logger.info("Genre found in database. Genre ID: " + genreId);
-                return genreId;
+        try (Connection conn = ConnectionManager.getConnection()) {
+            // Вставляем жанр, если он не существует
+            try (PreparedStatement stmt = conn.prepareStatement(sqlInsert)) {
+                stmt.setString(1, genreName);
+                stmt.executeUpdate();
             }
 
-            // Если жанр не найден, вставляем новый
-            logger.info("Genre not found in database. Inserting new genre: " + genreName);
-            try (PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
-                insertStmt.setString(1, genreName);
-                ResultSet insertRs = insertStmt.executeQuery();
-                if (insertRs.next()) {
-                    int genreId = insertRs.getInt("id");
-                    logger.info("New genre inserted successfully. Genre ID: " + genreId);
-                    return genreId;
+            // Получаем ID жанра
+            try (PreparedStatement stmt = conn.prepareStatement(sqlSelect)) {
+                stmt.setString(1, genreName);
+                ResultSet rs = stmt.executeQuery();
+                if (rs.next()) {
+                    return rs.getInt("id");
+                } else {
+                    logger.severe("Genre not found after insert/update: " + genreName);
+                    throw new SQLException("Failed to retrieve Genre ID.");
                 }
             }
+
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Error occurred while saving or retrieving genre: " + genreName, e);
         }
 
-        logger.severe("Failed to save or retrieve Genre ID for genre: " + genreName);
-        return -1;
+        return -1; // Если ничего не найдено
     }
+
 }
