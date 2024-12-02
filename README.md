@@ -139,7 +139,6 @@ MovieFinder is a lightweight web application designed to help users discover mov
 - **Random Movie Picker (1 day)**:  
   - Add a button to select a random movie from the user's lists.  
 
-
 задачи 
 пределать дб(спросить как мне лучше хранить данные(id api или всё в дб))(а что если в TMDB изменятся id)
 блокировку дб 
