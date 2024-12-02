@@ -1,10 +1,10 @@
 -- Table: film
 CREATE TABLE film (
-                      id SERIAL PRIMARY KEY,
+                      id SERIAL PRIMARY KEY, -- Автоинкрементный идентификатор
                       title VARCHAR(60) NOT NULL,
                       release_date DATE NOT NULL,
                       poster_url TEXT NOT NULL,
-                      api_id INT NOT NULL UNIQUE,
+                      api_id INT NOT NULL UNIQUE, -- Уникальное ограничение для API ID
                       runtime INT NOT NULL,
                       api_rating NUMERIC(3, 2) NOT NULL,
                       rating NUMERIC(3, 2),
@@ -13,19 +13,19 @@ CREATE TABLE film (
                       overview TEXT
 );
 
--- Table: "user"
+-- Table: users
 CREATE TABLE users (
-                        id SERIAL PRIMARY KEY,
-                        nickname VARCHAR(225) NOT NULL UNIQUE,
-                        email VARCHAR(225) NOT NULL UNIQUE,
-                        password VARCHAR(225) NOT NULL,
-                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+                       id SERIAL PRIMARY KEY,
+                       nickname VARCHAR(225) NOT NULL UNIQUE,
+                       email VARCHAR(225) NOT NULL UNIQUE,
+                       password VARCHAR(225) NOT NULL,
+                       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 -- Table: director
 CREATE TABLE director (
                           id SERIAL PRIMARY KEY,
-                          name VARCHAR(40) NOT NULL UNIQUE
+                          name VARCHAR(40) NOT NULL UNIQUE -- Уникальное имя режиссера
 );
 
 -- Table: director_film
@@ -40,7 +40,7 @@ CREATE TABLE director_film (
 -- Table: genre
 CREATE TABLE genre (
                        id SERIAL PRIMARY KEY,
-                       name VARCHAR(20) NOT NULL UNIQUE
+                       name VARCHAR(20) NOT NULL UNIQUE -- Уникальное имя жанра
 );
 
 -- Table: genre_film
@@ -87,7 +87,7 @@ CREATE TABLE reviews (
 -- Table: role
 CREATE TABLE role (
                       id SERIAL PRIMARY KEY,
-                      role VARCHAR(20) NOT NULL UNIQUE
+                      role VARCHAR(20) NOT NULL UNIQUE -- Уникальное название роли
 );
 
 -- Table: user_role
@@ -110,3 +110,19 @@ CREATE TABLE viewed_movies (
                                CONSTRAINT fk_viewed_movie_film FOREIGN KEY (film_id) REFERENCES film (id) ON DELETE CASCADE,
                                CONSTRAINT fk_viewed_movie_review FOREIGN KEY (reviews_id) REFERENCES reviews (id) ON DELETE CASCADE
 );
+
+-- Table: type
+CREATE TABLE type (
+                      id SERIAL PRIMARY KEY,
+                      name VARCHAR(20) NOT NULL UNIQUE -- Уникальное название типа
+);
+
+-- Table: play_list_type
+CREATE TABLE play_list_type (
+                                id SERIAL PRIMARY KEY,
+                                type_id INT NOT NULL,
+                                playlist_id INT NOT NULL,
+                                CONSTRAINT fk_play_list_type_type FOREIGN KEY (type_id) REFERENCES type (id) ON DELETE CASCADE,
+                                CONSTRAINT fk_play_list_type_playlist FOREIGN KEY (playlist_id) REFERENCES playlist (id) ON DELETE CASCADE
+);
+
