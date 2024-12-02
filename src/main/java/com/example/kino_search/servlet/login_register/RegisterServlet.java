@@ -1,7 +1,7 @@
 package com.example.kino_search.servlet.login_register;
 
 import org.mindrot.jbcrypt.BCrypt;
-import com.example.kino_search.db.ConectionManager;
+import com.example.kino_search.db.ConnectionManager;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -31,7 +31,7 @@ public class RegisterServlet extends HttpServlet {
         // Хешируем пароль
         String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
 
-        try (Connection conn = ConectionManager.getConnection()) {
+        try (Connection conn = ConnectionManager.getConnection()) {
             // Проверяем, существует ли email в базе
             String checkEmailSql = "SELECT COUNT(*) FROM users WHERE email = ?";
             try (PreparedStatement checkStmt = conn.prepareStatement(checkEmailSql)) {

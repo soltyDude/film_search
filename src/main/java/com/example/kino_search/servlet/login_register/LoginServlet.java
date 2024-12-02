@@ -2,7 +2,7 @@ package com.example.kino_search.servlet.login_register;
 
 import jakarta.servlet.http.HttpSession;
 import org.mindrot.jbcrypt.BCrypt;
-import com.example.kino_search.db.ConectionManager;
+import com.example.kino_search.db.ConnectionManager;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -23,7 +23,7 @@ public class LoginServlet extends HttpServlet {
         String email = request.getParameter("email");
         String password = request.getParameter("password");
 
-        try (Connection conn = ConectionManager.getConnection()) {
+        try (Connection conn = ConnectionManager.getConnection()) {
             String sql = "SELECT password, nickname FROM users WHERE email = ?";
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, email);

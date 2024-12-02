@@ -8,8 +8,8 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class ConectionManager {
-    private static final Logger logger = Logger.getLogger(ConectionManager.class.getName());
+public class ConnectionManager {
+    private static final Logger logger = Logger.getLogger(ConnectionManager.class.getName());
     private static Connection connection;
 
     public static Connection getConnection() {
