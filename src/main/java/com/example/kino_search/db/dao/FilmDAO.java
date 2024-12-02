@@ -14,7 +14,7 @@ public class FilmDAO {
 
     private static final Logger logger = Logger.getLogger(FilmDAO.class.getName());
 
-    // Метод для сохранения фильма в таблицу
+    // Метод для сохранения фильма в таблицу потом убуду использовать для ежедненого обновления
     public static void saveOrUpdateFilm(Film film) {
         String sqlInsert = """
         INSERT INTO film (api_id, title, release_date, poster_url, runtime, api_rating, rating, api_count, count, overview)
