@@ -147,3 +147,5 @@ MovieFinder is a lightweight web application designed to help users discover mov
 проверять данные с api на вшивость 
 добавление тегов жанров критиками
 чтобы данные обновлялись ежесуточно( например рэйтинг)
+проверка пароля
+
