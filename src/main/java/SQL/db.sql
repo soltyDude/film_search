@@ -68,7 +68,8 @@ CREATE TABLE playlist_film (
                                playlist_id INT NOT NULL,
                                film_id INT NOT NULL,
                                CONSTRAINT fk_playlist FOREIGN KEY (playlist_id) REFERENCES playlist (id) ON DELETE CASCADE,
-                               CONSTRAINT fk_playlist_film FOREIGN KEY (film_id) REFERENCES film (id) ON DELETE CASCADE
+                               CONSTRAINT fk_playlist_film FOREIGN KEY (film_id) REFERENCES film (id) ON DELETE CASCADE,
+                               CONSTRAINT unique_playlist_film UNIQUE (playlist_id, film_id) -- Уникальное ограничение
 );
 
 -- Table: reviews
