@@ -60,5 +60,16 @@
     </servlet-mapping>
 
 
+    <!-- добавиьть фильм -->
+    <servlet>
+        <servlet-name>AddFilmToPlaylistServlet</servlet-name>
+        <servlet-class>com.example.kino_search.servlet.playlists.AddFilmToPlaylistServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AddFilmToPlaylistServlet</servlet-name>
+        <url-pattern>/addFilmToPlaylist</url-pattern>
+    </servlet-mapping>
+
+
 
 </web-app>

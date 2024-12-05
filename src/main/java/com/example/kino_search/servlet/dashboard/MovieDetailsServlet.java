@@ -1,5 +1,6 @@
 package com.example.kino_search.servlet.dashboard;
 
+import com.example.kino_search.db.FilmService;
 import com.example.kino_search.util.TMDBApiUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -8,14 +9,21 @@ import jakarta.servlet.http.HttpServletResponse;
 import com.google.gson.JsonObject;
 
 import java.io.IOException;
+import java.util.logging.Logger;
+
 
 public class MovieDetailsServlet extends HttpServlet {
 
+    private static final Logger logger = Logger.getLogger(MovieDetailsServlet.class.getName());
     private static final String IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String movieId = request.getParameter("id");
+        logger.info("Received request for movie details. Query parameter 'apiId': " + movieId);
+
+        //добавляем фильм в датабазу если он когото заинтересовал
+        FilmService.fetchAndSaveFilm(Integer.parseInt(movieId));
 
         if (movieId == null || movieId.trim().isEmpty()) {
             request.setAttribute("error", "Movie ID is required.");
@@ -32,6 +40,13 @@ public class MovieDetailsServlet extends HttpServlet {
             request.setAttribute("overview", movieDetails.get("overview").getAsString());
             request.setAttribute("release_date", movieDetails.get("release_date").getAsString());
             request.setAttribute("poster_url", IMAGE_BASE_URL + movieDetails.get("poster_path").getAsString());
+            request.setAttribute("apiId", movieId);
+
+            request.setAttribute("playlistId", 1); // или другой ID плейлист
+
+
+
+
 
             // Рейтинг
             if (movieDetails.has("vote_average") && !movieDetails.get("vote_average").isJsonNull()) {

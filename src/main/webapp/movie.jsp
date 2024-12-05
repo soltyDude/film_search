@@ -51,5 +51,12 @@
     </div>
   </div>
 </div>
+
+<form action="<%= request.getContextPath() %>/addFilmToPlaylist" method="post">
+  <input type="hidden" name="playlistId" value="<%= request.getAttribute("playlistId") %>">
+  <input type="hidden" name="apiId" value="<%= request.getAttribute("apiId") %>">
+  <button type="submit">Want to Watch</button>
+</form>
+
 </body>
 </html>
