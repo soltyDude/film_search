@@ -8,7 +8,10 @@ import com.example.kino_search.util.TMDBApiUtil;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+import java.sql.Connection;
 import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -68,5 +71,27 @@ public class FilmService {
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error occurred while processing film with API ID: " + apiId, e);
         }
+    }
+
+    public static String getFilmTitle(int filmId) {
+        String sql = "SELECT title FROM film WHERE id = ?";
+        try (Connection conn = ConnectionManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, filmId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    String title = rs.getString("title");
+                    logger.info("Film title retrieved successfully for ID: " + filmId + ", Title: " + title);
+                    return title;
+                } else {
+                    logger.warning("No film found with ID: " + filmId);
+                }
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error retrieving film title for ID: " + filmId, e);
+        }
+        return null; // Return null if no film is found or an error occurred
     }
 }

@@ -14,26 +14,26 @@ public class PlaylistFilmDAO {
     private static final Logger logger = Logger.getLogger(PlaylistFilmDAO.class.getName());
 
     // Добавление фильма в плейлист
-    public static boolean addFilmToPlaylist(int playlistId, int apiId) {
+    public static boolean addFilmToPlaylist(int playlistId, int filmID) {
         // Сначала сохраняем или получаем фильм из базы
-        FilmService.fetchAndSaveFilm(apiId);
+        FilmService.fetchAndSaveFilm(filmID);
 
         String sql = """
             INSERT INTO playlist_film (playlist_id, film_id)
-            VALUES (?, (SELECT id FROM film WHERE api_id = ?))
+            VALUES (?, ?)
             ON CONFLICT DO NOTHING
         """;
 
         try (Connection conn = ConnectionManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, playlistId);
-            stmt.setInt(2, apiId);
+            stmt.setInt(2, filmID);
             int rowsAffected = stmt.executeUpdate();
             if (rowsAffected > 0) {
-                logger.info("Film added to playlist: Playlist ID = " + playlistId + ", API ID = " + apiId);
+                logger.info("Film added to playlist: Playlist ID = " + playlistId + ",  ID = " + filmID);
                 return true;
             } else {
-                logger.info("Film already exists in playlist: Playlist ID = " + playlistId + ", API ID = " + apiId);
+                logger.info("Film already exists in playlist: Playlist ID = " + playlistId + ",  ID = " + filmID);
             }
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Error adding film to playlist", e);
