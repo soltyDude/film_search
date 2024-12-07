@@ -8,10 +8,9 @@ import com.example.kino_search.util.TMDBApiUtil;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-import java.sql.Connection;
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -117,6 +116,30 @@ public class FilmService {
             logger.log(Level.SEVERE, "Error retrieving film ID for API ID: " + apiId, e);
         }
         return null; // Return null if no film is found or an error occurred
+    }
+
+
+    public static Map<String, Object> getFilmDetailsById(int filmId) {
+        String sql = "SELECT title, overview, release_date, poster_url, rating FROM film WHERE id = ?";
+        Map<String, Object> movieDetails = new HashMap<>();
+
+        try (Connection conn = ConnectionManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, filmId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    movieDetails.put("title", rs.getString("title"));
+                    movieDetails.put("overview", rs.getString("overview"));
+                    movieDetails.put("release_date", rs.getDate("release_date").toString());
+                    movieDetails.put("poster_url", rs.getString("poster_url"));
+                    movieDetails.put("rating", rs.getObject("rating")); // Может быть null
+                }
+            }
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error retrieving movie details for film ID: " + filmId, e);
+        }
+        return movieDetails;
     }
 
 }

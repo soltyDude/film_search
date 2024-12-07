@@ -10,6 +10,7 @@ import com.google.gson.JsonObject;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.logging.Logger;
 
 
@@ -47,35 +48,43 @@ public class MovieDetailsServlet extends HttpServlet {
         }
 
         try {
-            String endpoint = "/movie/" + movieId;
-            JsonObject movieDetails = TMDBApiUtil.sendRequest(endpoint);
+            // Получаем информацию о фильме из базы данных
+            int filmId = FilmService.getFilmIdByApiId(Integer.parseInt(movieId));
 
-            //этобрать из базы
+            if (filmId == -1) {
+                throw new Exception("Film not found in the database for API ID: " + movieId);
+            }
+
+            // Получаем данные о фильме из базы данных
+            Map<String, Object> movieDetails = FilmService.getFilmDetailsById(filmId);
 
             // Передаем данные фильма на JSP
-            request.setAttribute("title", movieDetails.get("title").getAsString());
-            request.setAttribute("overview", movieDetails.get("overview").getAsString());
-            request.setAttribute("release_date", movieDetails.get("release_date").getAsString());
-            request.setAttribute("poster_url", IMAGE_BASE_URL + movieDetails.get("poster_path").getAsString());
+            request.setAttribute("title", movieDetails.get("title"));
+            request.setAttribute("overview", movieDetails.get("overview"));
+            request.setAttribute("release_date", movieDetails.get("release_date"));
+            request.setAttribute("poster_url", movieDetails.get("poster_url"));
             request.setAttribute("apiId", movieId);
-
             request.setAttribute("playlistId", 1); // или другой ID плейлист
 
-
             // Рейтинг
-            if (movieDetails.has("vote_average") && !movieDetails.get("vote_average").isJsonNull()) {
-                request.setAttribute("rating", movieDetails.get("vote_average").getAsString());
+            Object rating = movieDetails.get("rating");
+            if (rating != null) {
+                request.setAttribute("rating", rating.toString());
             } else {
                 request.setAttribute("rating", "N/A");
             }
 
-            // доп сюда
+            logger.info("Successfully retrieved movie details from the database for filmId: " + filmId);
 
         } catch (Exception e) {
+            logger.severe("Failed to load movie details from the database. Error: " + e.getMessage());
             request.setAttribute("error", "Failed to load movie details.");
             e.printStackTrace();
+            request.getRequestDispatcher("error.jsp").forward(request, response);
+            return;
         }
 
         request.getRequestDispatcher("movie.jsp").forward(request, response);
+
     }
 }
