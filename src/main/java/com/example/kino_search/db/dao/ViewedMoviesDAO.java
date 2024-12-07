@@ -14,21 +14,18 @@ public class ViewedMoviesDAO {
     private static final Logger logger = Logger.getLogger(ViewedMoviesDAO.class.getName());
 
     // добавление в просмотренные
-    public static boolean addMovieToViewed(int userId, int filmId) {
+    public static boolean addMovieToViewed(int userId, int filmId, Integer reviewId) {
         String sql = """
-                INSERT INTO viewed_movies (user_id, film_id, reviews_id) 
-                VALUES (?, ?, ?) 
-                ON CONFLICT (user_id, film_id) DO NOTHING
-                """;
+            INSERT INTO viewed_movies (user_id, film_id) 
+            VALUES (?, ?) 
+            ON CONFLICT (user_id, film_id) DO NOTHING
+            """;
+
         try (Connection conn = ConnectionManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, userId);
             stmt.setInt(2, filmId);
-
-            //ревью нулл
-            stmt.setNull(3, java.sql.Types.INTEGER);
-
 
             int rowsAffected = stmt.executeUpdate();
             if (rowsAffected > 0) {
@@ -42,6 +39,7 @@ public class ViewedMoviesDAO {
         }
         return false;
     }
+
 
     // Remove a movie from the "viewed_movies" table
     public static boolean removeMovieFromViewed(int userId, int filmId) {

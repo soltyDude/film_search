@@ -78,8 +78,8 @@ CREATE TABLE reviews (
                          rating INT NOT NULL,
                          review_text TEXT,
                          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-                         user_id INT NOT NULL,
-                         film_id INT NOT NULL,
+                         user_id INT NOT NULL,--не обязательно(можно получать из whatched) но ьудет чуть удобне(на один запрос меньше)
+                         film_id INT NOT NULL,--не обязательно(можно получать из whatched) но ьудет чуть удобне(на один запрос меньше)
                          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
                          CONSTRAINT fk_review_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
                          CONSTRAINT fk_review_film FOREIGN KEY (film_id) REFERENCES film (id) ON DELETE CASCADE
@@ -103,14 +103,16 @@ CREATE TABLE user_role (
 -- Table: viewed_movies
 CREATE TABLE viewed_movies (
                                id SERIAL PRIMARY KEY,
-                               viewed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+                               viewed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL, -- Timestamp of when the movie was marked as viewed
                                reviews_id INT DEFAULT NULL, -- Optional reviews_id
-                               user_id INT NOT NULL,
-                               film_id INT NOT NULL,
-                               CONSTRAINT fk_viewed_movie_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
-                               CONSTRAINT fk_viewed_movie_film FOREIGN KEY (film_id) REFERENCES film (id) ON DELETE CASCADE,
-                               CONSTRAINT fk_viewed_movie_review FOREIGN KEY (reviews_id) REFERENCES reviews (id) ON DELETE CASCADE
+                               user_id INT NOT NULL, -- ID of the user who viewed the movie
+                               film_id INT NOT NULL, -- ID of the film that was viewed
+                               CONSTRAINT fk_viewed_movie_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE, -- Foreign key to users
+                               CONSTRAINT fk_viewed_movie_film FOREIGN KEY (film_id) REFERENCES film (id) ON DELETE CASCADE, -- Foreign key to films
+                               CONSTRAINT fk_viewed_movie_review FOREIGN KEY (reviews_id) REFERENCES reviews (id) ON DELETE CASCADE, -- Foreign key to reviews
+                               CONSTRAINT unique_user_film UNIQUE (user_id, film_id) -- Unique constraint to prevent duplicate entries for the same user and film
 );
+
 
 -- Table: type
 CREATE TABLE type (

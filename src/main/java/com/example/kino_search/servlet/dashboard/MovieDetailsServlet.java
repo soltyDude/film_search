@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import com.google.gson.JsonObject;
+import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -22,6 +23,20 @@ public class MovieDetailsServlet extends HttpServlet {
         String movieId = request.getParameter("id");
         logger.info("Received request for movie details. Query parameter 'apiId': " + movieId);
 
+
+
+        HttpSession session = request.getSession(false); // false - чтобы избежать создания новой сессии
+        Integer userId = null;
+        if (session != null && session.getAttribute("userId") != null) {
+            userId = (Integer) session.getAttribute("userId");
+
+        } else {
+            logger.info("Received request for movie details. Query parameter 'userId': " + userId);
+            response.sendRedirect("login.jsp");
+        }
+
+        logger.info("User ID retrieved from session: " + userId);
+
         //добавляем фильм в датабазу если он когото заинтересовал
         FilmService.fetchAndSaveFilm(Integer.parseInt(movieId));
 
@@ -35,6 +50,8 @@ public class MovieDetailsServlet extends HttpServlet {
             String endpoint = "/movie/" + movieId;
             JsonObject movieDetails = TMDBApiUtil.sendRequest(endpoint);
 
+            //этобрать из базы
+
             // Передаем данные фильма на JSP
             request.setAttribute("title", movieDetails.get("title").getAsString());
             request.setAttribute("overview", movieDetails.get("overview").getAsString());
@@ -43,9 +60,6 @@ public class MovieDetailsServlet extends HttpServlet {
             request.setAttribute("apiId", movieId);
 
             request.setAttribute("playlistId", 1); // или другой ID плейлист
-
-
-
 
 
             // Рейтинг

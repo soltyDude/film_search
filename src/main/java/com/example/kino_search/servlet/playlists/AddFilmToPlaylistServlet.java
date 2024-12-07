@@ -54,7 +54,7 @@ public class AddFilmToPlaylistServlet extends HttpServlet {
             if (isAded) {
                 // Получите названия плейлиста и фильма для отображения
                 String playlistName = "whant to whatch"/*PlaylistDAO.getPlaylistName(parsedPlaylistId)*/;
-                String filmTitle = FilmService.getFilmTitle(filmId);
+                String filmTitle = FilmService.getFilmTitleByID(filmId);
 
                 request.setAttribute("playlistName", playlistName);
                 request.setAttribute("filmTitle", filmTitle);

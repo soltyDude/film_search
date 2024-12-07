@@ -58,5 +58,11 @@
   <button type="submit">Want to Watch</button>
 </form>
 
+<form action="<%= request.getContextPath() %>/addToWatched" method="post">
+  <input type="hidden" name="apiId" value="<%= request.getAttribute("apiId") %>">
+  <input type="hidden" name="userId" value="<%= session.getAttribute("userId") %>"> <!-- Assuming userId is stored in session -->
+  <button type="submit">Add to Watched</button>
+</form>
+
 </body>
 </html>

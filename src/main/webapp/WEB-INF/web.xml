@@ -70,6 +70,14 @@
         <url-pattern>/addFilmToPlaylist</url-pattern>
     </servlet-mapping>
 
-
+    <!-- добавиьть фильм в просмотренные -->
+    <servlet>
+        <servlet-name>AddToWatchedServlet</servlet-name>
+        <servlet-class>com.example.kino_search.servlet.playlists.AddToWatchedServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AddToWatchedServlet</servlet-name>
+        <url-pattern>/addToWatched</url-pattern>
+    </servlet-mapping>
 
 </web-app>

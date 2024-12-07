@@ -73,25 +73,50 @@ public class FilmService {
         }
     }
 
-    public static String getFilmTitle(int filmId) {
+    public static String getFilmTitleByID(int id) {
+
         String sql = "SELECT title FROM film WHERE id = ?";
         try (Connection conn = ConnectionManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setInt(1, filmId);
+            stmt.setInt(1, id);
 
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     String title = rs.getString("title");
-                    logger.info("Film title retrieved successfully for ID: " + filmId + ", Title: " + title);
+                    logger.info("Film title retrieved successfully for Film ID: " + id + ", Title: " + title);
                     return title;
                 } else {
-                    logger.warning("No film found with ID: " + filmId);
+                    logger.warning("No film found with ID: " + id);
                 }
             }
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Error retrieving film title for ID: " + filmId, e);
+            logger.log(Level.SEVERE, "Error retrieving film title for Film ID: " + id, e);
         }
         return null; // Return null if no film is found or an error occurred
     }
+
+
+    public static Integer getFilmIdByApiId(int apiId) {
+        String sql = "SELECT id FROM film WHERE api_id = ?";
+        try (Connection conn = ConnectionManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, apiId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    int filmId = rs.getInt("id");
+                    logger.info("Film ID retrieved successfully for API ID: " + apiId + ", Film ID: " + filmId);
+                    return filmId;
+                } else {
+                    logger.warning("No film found with API ID: " + apiId);
+                }
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error retrieving film ID for API ID: " + apiId, e);
+        }
+        return null; // Return null if no film is found or an error occurred
+    }
+
 }
