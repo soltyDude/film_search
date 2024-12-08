@@ -1,5 +1,6 @@
 package com.example.kino_search.servlet.dashboard;
 
+import com.example.kino_search.db.dao.PlaylistDAO;
 import com.example.kino_search.db.FilmService;
 import com.example.kino_search.util.TMDBApiUtil;
 import jakarta.servlet.ServletException;
@@ -17,12 +18,11 @@ import java.util.logging.Logger;
 public class MovieDetailsServlet extends HttpServlet {
 
     private static final Logger logger = Logger.getLogger(MovieDetailsServlet.class.getName());
-    private static final String IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String movieId = request.getParameter("id");
-        logger.info("Received request for movie details. Query parameter 'apiId': " + movieId);
+        String movieAPIId = request.getParameter("id");
+        logger.info("Received request for movie details. Query parameter 'apiId': " + movieAPIId);
 
 
 
@@ -39,9 +39,9 @@ public class MovieDetailsServlet extends HttpServlet {
         logger.info("User ID retrieved from session: " + userId);
 
         //добавляем фильм в датабазу если он когото заинтересовал
-        FilmService.fetchAndSaveFilm(Integer.parseInt(movieId));
+        FilmService.fetchAndSaveFilm(Integer.parseInt(movieAPIId));
 
-        if (movieId == null || movieId.trim().isEmpty()) {
+        if (movieAPIId == null || movieAPIId.trim().isEmpty()) {
             request.setAttribute("error", "Movie ID is required.");
             request.getRequestDispatcher("error.jsp").forward(request, response);
             return;
@@ -49,22 +49,28 @@ public class MovieDetailsServlet extends HttpServlet {
 
         try {
             // Получаем информацию о фильме из базы данных
-            int filmId = FilmService.getFilmIdByApiId(Integer.parseInt(movieId));
+            int filmId = FilmService.getFilmIdByApiId(Integer.parseInt(movieAPIId));
 
             if (filmId == -1) {
-                throw new Exception("Film not found in the database for API ID: " + movieId);
+                throw new Exception("Film not found in the database for API ID: " + movieAPIId);
             }
 
             // Получаем данные о фильме из базы данных
             Map<String, Object> movieDetails = FilmService.getFilmDetailsById(filmId);
 
+            // Получаем ID плейлиста "Want to Watch" для текущего пользователя
+            int playlistId = PlaylistDAO.getWantToWatchPlaylistId(userId);
+
+            if (playlistId == -1) {
+                throw new Exception("Want to Watch playlist not found for user ID: " + userId);
+            }
             // Передаем данные фильма на JSP
             request.setAttribute("title", movieDetails.get("title"));
             request.setAttribute("overview", movieDetails.get("overview"));
             request.setAttribute("release_date", movieDetails.get("release_date"));
             request.setAttribute("poster_url", movieDetails.get("poster_url"));
-            request.setAttribute("apiId", movieId);
-            request.setAttribute("playlistId", 1); // или другой ID плейлист
+            request.setAttribute("apiId", movieAPIId);
+            request.setAttribute("playlistId", playlistId); // или другой ID плейлист
 
             // Рейтинг
             Object rating = movieDetails.get("rating");

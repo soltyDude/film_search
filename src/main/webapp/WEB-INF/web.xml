@@ -80,4 +80,24 @@
         <url-pattern>/addToWatched</url-pattern>
     </servlet-mapping>
 
+    <!-- просмотр плэйлистов -->
+    <servlet>
+        <servlet-name>UserPlaylistsServlet</servlet-name>
+        <servlet-class>com.example.kino_search.servlet.playlists.UserPlaylistsServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>UserPlaylistsServlet</servlet-name>
+        <url-pattern>/playlists</url-pattern>
+    </servlet-mapping>
+
+    <!-- просмотр фильмов в плэйлистов -->
+    <servlet>
+        <servlet-name>ViewPlaylistServlet</servlet-name>
+        <servlet-class>com.example.kino_search.servlet.playlists.ViewPlaylistServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ViewPlaylistServlet</servlet-name>
+        <url-pattern>/viewPlaylist</url-pattern>
+    </servlet-mapping>
+
 </web-app>
