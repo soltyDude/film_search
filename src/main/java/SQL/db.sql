@@ -75,7 +75,7 @@ CREATE TABLE playlist_film (
 -- Table: reviews
 CREATE TABLE reviews (
                          id SERIAL PRIMARY KEY,
-                         rating INT NOT NULL,
+                         rating INT CHECK (rating BETWEEN 1 AND 10), -- Оценка от 1 до 10
                          review_text TEXT,
                          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
                          user_id INT NOT NULL,--не обязательно(можно получать из whatched) но ьудет чуть удобне(на один запрос меньше)

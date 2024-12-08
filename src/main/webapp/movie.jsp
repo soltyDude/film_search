@@ -64,5 +64,15 @@
   <button type="submit">Add to Watched</button>
 </form>
 
+<!-- reviw -->
+<form action="addReview" method="post">
+  <label for="rating">Your Rating:</label>
+  <input type="range" id="rating" name="rating" min="1" max="10" value="5">
+  <label for="reviewText">Your Review:</label>
+  <textarea id="reviewText" name="reviewText" placeholder="Write your thoughts..."></textarea>
+  <button type="submit">Submit Review</button>
+</form>
+
+
 </body>
 </html>
