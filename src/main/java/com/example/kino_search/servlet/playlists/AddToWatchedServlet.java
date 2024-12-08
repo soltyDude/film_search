@@ -38,7 +38,7 @@ public class AddToWatchedServlet extends HttpServlet {
             //int reviewId = ReviewDAO.addPlaceholderReview(parsedUserId, filmId);
 
             // Add the movie to "viewed_movies"
-            boolean addedToWatched = ViewedMoviesDAO.addMovieToViewed(parsedUserId, filmId, -1);
+            boolean addedToWatched = ViewedMoviesDAO.addMovieToViewed(parsedUserId, filmId, null);
 
             if (addedToWatched) {
                 String filmTitle = FilmService.getFilmTitleByID(filmId); // Получить название фильма

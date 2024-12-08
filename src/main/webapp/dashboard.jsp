@@ -48,7 +48,7 @@
 <nav>
     <a href="search.jsp">Search Movies</a>
     <a href="playlists">playlists</a>
-    <a href="whatched.jsp">whatched</a>
+    <a href="whatched">whatched</a>
     <a href="logout">Logout</a>
 </nav>
 

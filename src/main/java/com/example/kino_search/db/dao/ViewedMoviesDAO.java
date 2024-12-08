@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -13,11 +14,11 @@ public class ViewedMoviesDAO {
 
     private static final Logger logger = Logger.getLogger(ViewedMoviesDAO.class.getName());
 
-    // добавление в просмотренные
+    // Добавление фильма в просмотренные
     public static boolean addMovieToViewed(int userId, int filmId, Integer reviewId) {
         String sql = """
-            INSERT INTO viewed_movies (user_id, film_id) 
-            VALUES (?, ?) 
+            INSERT INTO viewed_movies (user_id, film_id, reviews_id) 
+            VALUES (?, ?, ?) 
             ON CONFLICT (user_id, film_id) DO NOTHING
             """;
 
@@ -26,6 +27,11 @@ public class ViewedMoviesDAO {
 
             stmt.setInt(1, userId);
             stmt.setInt(2, filmId);
+            if (reviewId != null) {
+                stmt.setInt(3, reviewId);
+            } else {
+                stmt.setNull(3, java.sql.Types.INTEGER);
+            }
 
             int rowsAffected = stmt.executeUpdate();
             if (rowsAffected > 0) {
@@ -40,8 +46,7 @@ public class ViewedMoviesDAO {
         return false;
     }
 
-
-    // Remove a movie from the "viewed_movies" table
+    // Удаление фильма из просмотренных
     public static boolean removeMovieFromViewed(int userId, int filmId) {
         String sql = "DELETE FROM viewed_movies WHERE user_id = ? AND film_id = ?";
         try (Connection conn = ConnectionManager.getConnection();
@@ -63,7 +68,7 @@ public class ViewedMoviesDAO {
         return false;
     }
 
-    // Check if a movie exists in the "viewed_movies" table for a user
+    // Проверка, существует ли фильм в просмотренных
     public static boolean isMovieInViewed(int userId, int filmId) {
         String sql = "SELECT 1 FROM viewed_movies WHERE user_id = ? AND film_id = ?";
         try (Connection conn = ConnectionManager.getConnection();
@@ -79,6 +84,71 @@ public class ViewedMoviesDAO {
             }
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Error checking if movie exists in viewed_movies", e);
+        }
+        return false;
+    }
+
+    // Получение списка просмотренных фильмов для пользователя
+    public static List<Map<String, Object>> getViewedMoviesByUserId(int userId) {
+        String sql = """
+            SELECT v.viewed_at, f.api_id, f.title, f.poster_url 
+            FROM viewed_movies v
+            JOIN film f ON v.film_id = f.id
+            WHERE v.user_id = ?
+            ORDER BY v.viewed_at DESC
+        """;
+        List<Map<String, Object>> viewedMovies = new ArrayList<>();
+
+        try (Connection conn = ConnectionManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, userId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> movie = new HashMap<>();
+                    movie.put("viewed_at", rs.getTimestamp("viewed_at"));
+                    movie.put("apiId", rs.getInt("api_id"));
+                    movie.put("title", rs.getString("title"));
+                    movie.put("poster_url", rs.getString("poster_url"));
+                    viewedMovies.add(movie);
+                }
+            }
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error retrieving viewed movies for user ID " + userId, e);
+        }
+
+        return viewedMovies;
+    }
+
+    // Обновление записи о просмотренном фильме (например, добавление review_id)
+    public static boolean updateViewedMovie(int userId, int filmId, Integer reviewId) {
+        String sql = """
+            UPDATE viewed_movies
+            SET reviews_id = ?
+            WHERE user_id = ? AND film_id = ?
+        """;
+
+        try (Connection conn = ConnectionManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            if (reviewId != null) {
+                stmt.setInt(1, reviewId);
+            } else {
+                stmt.setNull(1, java.sql.Types.INTEGER);
+            }
+            stmt.setInt(2, userId);
+            stmt.setInt(3, filmId);
+
+            int rowsAffected = stmt.executeUpdate();
+            if (rowsAffected > 0) {
+                logger.info("Viewed movie updated: User ID = " + userId + ", Film ID = " + filmId + ", Review ID = " + reviewId);
+                return true;
+            } else {
+                logger.info("No viewed movie found to update: User ID = " + userId + ", Film ID = " + filmId);
+            }
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error updating viewed movie", e);
         }
         return false;
     }

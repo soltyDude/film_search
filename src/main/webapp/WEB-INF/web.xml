@@ -100,4 +100,15 @@
         <url-pattern>/viewPlaylist</url-pattern>
     </servlet-mapping>
 
+    <!-- просмотр фильмов в просмотренных -->
+    <servlet>
+        <servlet-name>ViewedMoviesServlet</servlet-name>
+        <servlet-class>com.example.kino_search.servlet.playlists.ViewedMoviesServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ViewedMoviesServlet</servlet-name>
+        <url-pattern>/whatched</url-pattern>
+    </servlet-mapping>
+
+
 </web-app>
