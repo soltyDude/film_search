@@ -1,6 +1,7 @@
 package com.example.kino_search.servlet.dashboard;
 
 import com.example.kino_search.util.TMDBApiUtil;
+import com.example.kino_search.filter.ValidMovieFilter;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import jakarta.servlet.ServletException;
@@ -13,7 +14,6 @@ import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -49,26 +49,29 @@ public class SearchServlet extends HttpServlet {
             for (int i = 0; i < results.size(); i++) {
                 JsonObject movie = results.get(i).getAsJsonObject();
                 Map<String, String> movieData = new HashMap<>();
-                movieData.put("id", movie.get("id").getAsString()); // Убедитесь, что ID добавляется\
-                logger.info("apiId: " + movie.get("id").getAsString());
+                movieData.put("id", movie.get("id").getAsString()); // Убедитесь, что ID добавляется
 
                 movieData.put("title", movie.get("title").getAsString());
                 movieData.put("overview", movie.get("overview").getAsString());
                 movieData.put("release_date", movie.get("release_date").getAsString());
 
-                // Добавляем постер
+                // Добавляем постер, если он существует
                 if (movie.has("poster_path") && !movie.get("poster_path").isJsonNull()) {
                     movieData.put("poster_url", IMAGE_BASE_URL + movie.get("poster_path").getAsString());
-                } else {
-                    movieData.put("poster_url", ""); // Если постера нет
                 }
-
 
                 movies.add(movieData);
             }
 
-            logger.info("Number of movies found: " + movies.size());
-// Передаем список фильмов на JSP
+            logger.info("Number of movies before filtering: " + movies.size());
+
+            // Фильтруем фильмы
+            ValidMovieFilter filter = new ValidMovieFilter();
+            movies = filter.filter(movies);
+
+            logger.info("Number of movies after filtering: " + movies.size());
+
+            // Передаем список фильмов на JSP
             request.setAttribute("movies", movies);
 
         } catch (Exception e) {

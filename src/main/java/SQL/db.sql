@@ -74,15 +74,16 @@ CREATE TABLE playlist_film (
 
 -- Table: reviews
 CREATE TABLE reviews (
-                         id SERIAL PRIMARY KEY,
+                         id SERIAL PRIMARY KEY, -- Уникальный идентификатор отзыва
                          rating INT CHECK (rating BETWEEN 1 AND 10), -- Оценка от 1 до 10
-                         review_text TEXT,
-                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-                         user_id INT NOT NULL,--не обязательно(можно получать из whatched) но ьудет чуть удобне(на один запрос меньше)
-                         film_id INT NOT NULL,--не обязательно(можно получать из whatched) но ьудет чуть удобне(на один запрос меньше)
-                         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-                         CONSTRAINT fk_review_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
-                         CONSTRAINT fk_review_film FOREIGN KEY (film_id) REFERENCES film (id) ON DELETE CASCADE
+                         review_text TEXT, -- Текст отзыва
+                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL, -- Дата создания отзыва
+                         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL, -- Дата обновления отзыва
+                         user_id INT NOT NULL, -- Идентификатор пользователя
+                         film_id INT NOT NULL, -- Идентификатор фильма
+                         CONSTRAINT fk_review_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE, -- Внешний ключ на таблицу пользователей
+                         CONSTRAINT fk_review_film FOREIGN KEY (film_id) REFERENCES film (id) ON DELETE CASCADE, -- Внешний ключ на таблицу фильмов
+                         CONSTRAINT unique_user_film_review UNIQUE (user_id, film_id) -- Уникальное ограничение на пару user_id и film_id
 );
 
 -- Table: role

@@ -1,5 +1,6 @@
 package com.example.kino_search.servlet.review;
 
+import com.example.kino_search.db.FilmService;
 import com.example.kino_search.db.dao.ReviewDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -16,6 +17,14 @@ public class ReviewServlet extends HttpServlet {
             int filmAPIId = Integer.parseInt(request.getParameter("filmAPIId"));
             int rating = Integer.parseInt(request.getParameter("rating"));
             String reviewText = request.getParameter("reviewText");
+
+            int filmId = FilmService.getFilmIdByApiId(filmAPIId);
+
+            if (ReviewDAO.isReviewExists(userId, filmId)) {
+                request.setAttribute("errorMessage", "You have already submitted a review for this movie.");
+                request.getRequestDispatcher("error.jsp").forward(request, response);
+                return;
+            }
 
             // Добавляем отзыв в базу данных
             boolean success = ReviewDAO.addReview(userId, filmAPIId, rating, reviewText);

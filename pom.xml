@@ -30,6 +30,7 @@
       <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
+
       <dependency>
         <groupId>org.junit.jupiter</groupId>
         <artifactId>junit-jupiter-engine</artifactId>
@@ -60,11 +61,26 @@
           <version>2.8.8</version>
       </dependency>
 
+
       <!-- пул соединений  -->
       <dependency>
           <groupId>com.zaxxer</groupId>
           <artifactId>HikariCP</artifactId>
           <version>5.0.1</version>
+      </dependency>
+
+      <!-- дефолт сервлет для статіческіх файлов -->
+      <dependency>
+          <groupId>org.apache.tomcat.embed</groupId>
+          <artifactId>tomcat-embed-core</artifactId>
+          <version>10.1.10</version> <!-- Убедитесь, что версия совместима с вашим сервером -->
+          <scope>provided</scope> <!-- Эта зависимость не будет включена в финальный WAR -->
+      </dependency>
+      <dependency>
+          <groupId>org.apache.tomcat.embed</groupId>
+          <artifactId>tomcat-embed-jasper</artifactId>
+          <version>10.1.10</version>
+          <scope>provided</scope>
       </dependency>
 
 
@@ -73,7 +89,7 @@
   <build>
       <resources>
           <resource>
-              <directory>src/main/resources</directory>
+              <directory>src/main/webapp/resources</directory>
               <includes>
                   <include>**/*</include>
               </includes>
