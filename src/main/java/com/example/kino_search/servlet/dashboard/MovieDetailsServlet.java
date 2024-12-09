@@ -2,6 +2,7 @@ package com.example.kino_search.servlet.dashboard;
 
 import com.example.kino_search.db.dao.PlaylistDAO;
 import com.example.kino_search.db.FilmService;
+import com.example.kino_search.db.dao.ReviewDAO;
 import com.example.kino_search.util.TMDBApiUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -11,6 +12,7 @@ import com.google.gson.JsonObject;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -61,9 +63,13 @@ public class MovieDetailsServlet extends HttpServlet {
             // Получаем ID плейлиста "Want to Watch" для текущего пользователя
             int playlistId = PlaylistDAO.getWantToWatchPlaylistId(userId);
 
+
             if (playlistId == -1) {
                 throw new Exception("Want to Watch playlist not found for user ID: " + userId);
             }
+            // Получаем список отзывов
+            List<Map<String, Object>> reviews = ReviewDAO.getReviewsByFilmId(filmId);
+
             // Передаем данные фильма на JSP
             request.setAttribute("title", movieDetails.get("title"));
             request.setAttribute("overview", movieDetails.get("overview"));
@@ -71,6 +77,8 @@ public class MovieDetailsServlet extends HttpServlet {
             request.setAttribute("poster_url", movieDetails.get("poster_url"));
             request.setAttribute("apiId", movieAPIId);
             request.setAttribute("playlistId", playlistId); // или другой ID плейлист
+            request.setAttribute("reviews", reviews); // Передаем отзывы
+
 
             // Рейтинг
             Object rating = movieDetails.get("rating");

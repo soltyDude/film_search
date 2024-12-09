@@ -1,6 +1,7 @@
 package com.example.kino_search.db.dao;
 
 import com.example.kino_search.db.ConnectionManager;
+import com.example.kino_search.db.FilmService;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -16,14 +17,16 @@ import java.util.logging.Logger;
 public class ReviewDAO {
 
     private static final Logger logger = Logger.getLogger(ReviewDAO.class.getName());
-    public static boolean addReview(int userId, int filmId, int rating, String reviewText) {
+    public static boolean addReview(int userId, int filmAPIId, int rating, String reviewText) {
         String sql = """
         INSERT INTO reviews (user_id, film_id, rating, review_text) 
         VALUES (?, ?, ?, ?)
         """;
         try (Connection conn = ConnectionManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
+            int filmId = FilmService.getFilmIdByApiId(filmAPIId);
 
+            logger.info("adding review: userid: " + userId + " filmid: " + filmId + " rating: " + rating + " reviewText: " + reviewText);
             stmt.setInt(1, userId);
             stmt.setInt(2, filmId);
             stmt.setInt(3, rating);
@@ -39,8 +42,10 @@ public class ReviewDAO {
 
     public static List<Map<String, Object>> getReviewsByFilmId(int filmId) {
         String sql = """
-        SELECT user_id, rating, review_text, created_at 
-        FROM reviews WHERE film_id = ?
+        SELECT r.user_id, u.nickname AS user_nickname, r.rating, r.review_text, r.created_at 
+        FROM reviews r
+        JOIN users u ON r.user_id = u.id
+        WHERE r.film_id = ?
     """;
         List<Map<String, Object>> reviews = new ArrayList<>();
         try (Connection conn = ConnectionManager.getConnection();
@@ -51,6 +56,7 @@ public class ReviewDAO {
                 while (rs.next()) {
                     Map<String, Object> review = new HashMap<>();
                     review.put("user_id", rs.getInt("user_id"));
+                    review.put("user_nickname", rs.getString("user_nickname")); // Добавляем никнейм
                     review.put("rating", rs.getInt("rating"));
                     review.put("review_text", rs.getString("review_text"));
                     review.put("created_at", rs.getTimestamp("created_at"));

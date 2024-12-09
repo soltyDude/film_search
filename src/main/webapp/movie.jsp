@@ -1,3 +1,5 @@
+<%@ page import="java.util.Map" %>
+<%@ page import="java.util.List" %>
 <%@ page session="true" %>
 <!DOCTYPE html>
 <html lang="en">
@@ -67,12 +69,37 @@
 <!-- reviw -->
 <form action="addReview" method="post">
   <label for="rating">Your Rating:</label>
-  <input type="range" id="rating" name="rating" min="1" max="10" value="5">
+  <input type="range" id="rating" name="rating" min="1" max="10" value="5" required>
+
   <label for="reviewText">Your Review:</label>
-  <textarea id="reviewText" name="reviewText" placeholder="Write your thoughts..."></textarea>
+  <textarea id="reviewText" name="reviewText" placeholder="Write your thoughts..." required></textarea>
+
+  <input type="hidden" name="filmAPIId" value="<%= request.getAttribute("apiId") %>">
+  <input type="hidden" name="userId" value="<%= session.getAttribute("userId") %>">
+
   <button type="submit">Submit Review</button>
 </form>
 
-
+<div class="reviews">
+  <h2>Reviews:</h2>
+  <%
+    List<Map<String, Object>> reviews = (List<Map<String, Object>>) request.getAttribute("reviews");
+    if (reviews != null && !reviews.isEmpty()) {
+      for (Map<String, Object> review : reviews) {
+  %>
+  <div class="review">
+    <p><strong>Rating:</strong> <%= review.get("rating") %> stars</p>
+    <p><%= review.get("review_text") %></p>
+    <p><em>Reviewed by User <%= review.get("user_nickname") %></em></p>
+  </div>
+  <%
+    }
+  } else {
+  %>
+  <p>No reviews yet. Be the first to write one!</p>
+  <%
+    }
+  %>
+</div>
 </body>
 </html>

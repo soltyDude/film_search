@@ -110,5 +110,15 @@
         <url-pattern>/whatched</url-pattern>
     </servlet-mapping>
 
+    <!-- абміт ревью -->
+    <servlet>
+        <servlet-name>ReviewServlet</servlet-name>
+        <servlet-class>com.example.kino_search.servlet.review.ReviewServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ReviewServlet</servlet-name>
+        <url-pattern>/addReview</url-pattern>
+    </servlet-mapping>
+
 
 </web-app>

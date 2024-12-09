@@ -16,7 +16,7 @@ public class TestDatabaseConnection {
 
             if (connection != null) {
                 logger.info("Database connection test successful!");
-                ConnectionManager.closeConnection();
+                //ConnectionManager.closeConnection();
             }
         } catch (Exception e) {
             logger.severe("Database connection test failed: " + e.getMessage());
