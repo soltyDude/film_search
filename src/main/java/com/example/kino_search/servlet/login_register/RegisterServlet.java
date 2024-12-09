@@ -2,7 +2,6 @@ package com.example.kino_search.servlet.login_register;
 
 import org.mindrot.jbcrypt.BCrypt;
 import com.example.kino_search.db.ConnectionManager;
-
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,8 +22,14 @@ public class RegisterServlet extends HttpServlet {
         String password = request.getParameter("password");
         String confirmPassword = request.getParameter("confirmPassword");
 
+        // Проверка паролей
         if (!password.equals(confirmPassword)) {
             response.getWriter().write("Passwords do not match!");
+            return;
+        }
+
+        if (!PasswordValidator.validate(password)) {
+            response.getWriter().write("Password does not meet security requirements!");
             return;
         }
 
