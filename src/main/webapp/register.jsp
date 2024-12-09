@@ -55,6 +55,16 @@
 
     <span id="passwordError" style="color: red;"></span><br>
 
+    <!-- Добавляем текст с требованиями к паролю -->
+    <div>
+        <p><strong>Password Requirements:</strong></p>
+        <ul>
+            <li>At least 8 characters</li>
+            <li>At least one number</li>
+            <li>At least one uppercase letter</li>
+        </ul>
+    </div>
+
     <button type="submit">Register</button>
 </form>
 </body>
