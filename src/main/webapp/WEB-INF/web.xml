@@ -140,4 +140,25 @@
         <servlet-name>default</servlet-name>
         <url-pattern>/resources/*</url-pattern>
     </servlet-mapping>
+
+    <!-- для просмотра рекомендаций -->
+    <servlet>
+        <servlet-name>RecommendationServlet</servlet-name>
+        <servlet-class>com.example.kino_search.servlet.recomendations.RecommendationServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>RecommendationServlet</servlet-name>
+        <url-pattern>/recommendations</url-pattern>
+    </servlet-mapping>
+
+    <!-- для просмотра популярных -->
+    <servlet>
+        <servlet-name>PopularMoviesServlet</servlet-name>
+        <servlet-class>com.example.kino_search.servlet.popular.PopularMoviesServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>PopularMoviesServlet</servlet-name>
+        <url-pattern>/popular</url-pattern>
+    </servlet-mapping>
+
 </web-app>

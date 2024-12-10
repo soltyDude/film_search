@@ -47,10 +47,13 @@
 
 <nav>
     <a href="search.jsp">Search Movies</a>
-    <a href="playlists">playlists</a>
-    <a href="whatched">whatched</a>
+    <a href="playlists">Playlists</a>
+    <a href="whatched">Watched</a>
+    <a href="recommendations">Recommendations</a> <!-- Новая ссылка -->
+    <a href="popular">Popular Movies</a> <!-- Новая ссылка -->
     <a href="logout">Logout</a>
 </nav>
+
 
 <div class="container">
     <%
