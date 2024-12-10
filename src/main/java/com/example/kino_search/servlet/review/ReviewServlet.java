@@ -2,6 +2,8 @@ package com.example.kino_search.servlet.review;
 
 import com.example.kino_search.db.FilmService;
 import com.example.kino_search.db.dao.ReviewDAO;
+import com.example.kino_search.db.dao.ViewedMoviesDAO;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,6 +26,11 @@ public class ReviewServlet extends HttpServlet {
                 request.setAttribute("errorMessage", "You have already submitted a review for this movie.");
                 request.getRequestDispatcher("error.jsp").forward(request, response);
                 return;
+            }
+
+            // Проверяем, существует ли фильм в просмотренных, если нет - добавляем
+            if (!ViewedMoviesDAO.isMovieInViewed(userId, filmId)) {
+                ViewedMoviesDAO.addMovieToViewed(userId, filmId, null);
             }
 
             // Добавляем отзыв в базу данных

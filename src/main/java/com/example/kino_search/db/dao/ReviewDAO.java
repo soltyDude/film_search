@@ -19,21 +19,29 @@ public class ReviewDAO {
     private static final Logger logger = Logger.getLogger(ReviewDAO.class.getName());
     public static boolean addReview(int userId, int filmAPIId, int rating, String reviewText) {
         String reviewSql = """
-            INSERT INTO reviews (user_id, film_id, rating, review_text) 
-            VALUES (?, ?, ?, ?)
-        """;
+        INSERT INTO reviews (user_id, film_id, rating, review_text) 
+        VALUES (?, ?, ?, ?)
+        RETURNING id
+    """;
 
         String updateFilmSql = """
-            UPDATE film
-            SET 
-                rating = (rating * count + ?) / (count + 1),
-                count = count + 1
-            WHERE id = ?
-        """;
+        UPDATE film
+        SET 
+            rating = (rating * count + ?) / (count + 1),
+            count = count + 1
+        WHERE id = ?
+    """;
+
+        String updateViewedMovieSql = """
+        UPDATE viewed_movies
+        SET reviews_id = ?
+        WHERE user_id = ? AND film_id = ?
+    """;
 
         try (Connection conn = ConnectionManager.getConnection();
              PreparedStatement reviewStmt = conn.prepareStatement(reviewSql);
-             PreparedStatement updateFilmStmt = conn.prepareStatement(updateFilmSql)) {
+             PreparedStatement updateFilmStmt = conn.prepareStatement(updateFilmSql);
+             PreparedStatement updateViewedMovieStmt = conn.prepareStatement(updateViewedMovieSql)) {
 
             int filmId = FilmService.getFilmIdByApiId(filmAPIId);
 
@@ -42,21 +50,40 @@ public class ReviewDAO {
             reviewStmt.setInt(2, filmId);
             reviewStmt.setInt(3, rating);
             reviewStmt.setString(4, reviewText);
-            int reviewRowsAffected = reviewStmt.executeUpdate();
+
+            // Получаем ID созданного отзыва
+            int reviewId = -1;
+            try (ResultSet rs = reviewStmt.executeQuery()) {
+                if (rs.next()) {
+                    reviewId = rs.getInt("id");
+                }
+            }
+
+            if (reviewId == -1) {
+                throw new SQLException("Failed to retrieve the generated review ID.");
+            }
 
             // Обновляем данные фильма
             updateFilmStmt.setInt(1, rating);
             updateFilmStmt.setInt(2, filmId);
             int filmRowsAffected = updateFilmStmt.executeUpdate();
 
-            logger.info("Review added and film rating updated: User ID = " + userId + ", Film ID = " + filmId + ", Rating = " + rating);
-            return reviewRowsAffected > 0 && filmRowsAffected > 0;
+            // Обновляем поле reviews_id в просмотренных фильмах
+            updateViewedMovieStmt.setInt(1, reviewId);
+            updateViewedMovieStmt.setInt(2, userId);
+            updateViewedMovieStmt.setInt(3, filmId);
+            int viewedMovieRowsAffected = updateViewedMovieStmt.executeUpdate();
+
+            logger.info("Review added, film rating updated, and movie's reviews_id updated: User ID = " + userId + ", Film ID = " + filmId + ", Review ID = " + reviewId + ", Rating = " + rating);
+            return filmRowsAffected > 0 && viewedMovieRowsAffected > 0;
 
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Error adding review and updating film rating", e);
+            logger.log(Level.SEVERE, "Error adding review, updating film rating, and updating viewed movie's reviews_id", e);
             return false;
         }
     }
+
+
 
     public static boolean isReviewExists(int userId, int filmId) {
         String sql = """

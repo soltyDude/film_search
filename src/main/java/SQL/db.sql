@@ -1,13 +1,13 @@
 -- Table: film
 CREATE TABLE film (
                       id SERIAL PRIMARY KEY, -- Автоинкрементный идентификатор
-                      title VARCHAR(60) NOT NULL,
+                      title VARCHAR(300) NOT NULL,
                       release_date DATE NOT NULL,
                       poster_url TEXT NOT NULL,
                       api_id INT NOT NULL UNIQUE, -- Уникальное ограничение для API ID
                       runtime INT NOT NULL,
-                      api_rating NUMERIC(3, 2) NOT NULL,
-                      rating NUMERIC(3, 2),
+                      api_rating NUMERIC(3, 1) NOT NULL,
+                      rating NUMERIC(3, 1),
                       api_count INT NOT NULL,
                       count INT DEFAULT 0,
                       overview TEXT
@@ -75,7 +75,7 @@ CREATE TABLE playlist_film (
 -- Table: reviews
 CREATE TABLE reviews (
                          id SERIAL PRIMARY KEY, -- Уникальный идентификатор отзыва
-                         rating INT CHECK (rating BETWEEN 1 AND 10), -- Оценка от 1 до 10
+                         rating INT CHECK (rating BETWEEN 0 AND 11), -- Оценка от 1 до 10
                          review_text TEXT, -- Текст отзыва
                          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL, -- Дата создания отзыва
                          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL, -- Дата обновления отзыва
