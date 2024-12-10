@@ -104,6 +104,11 @@
       <input type="hidden" name="userId" value="<%= session.getAttribute("userId") %>">
       <button type="submit">Add to Watched</button>
     </form>
+
+    <form action="<%= request.getContextPath() %>/similarMovies" method="get">
+      <input type="hidden" name="apiId" value="<%= request.getAttribute("apiId") %>">
+      <button type="submit">Similar Movies</button>
+    </form>
   </div>
 
   <div class="reviews">

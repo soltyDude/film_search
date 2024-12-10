@@ -161,4 +161,14 @@
         <url-pattern>/popular</url-pattern>
     </servlet-mapping>
 
+    <!-- длядля копки просмотра похожих фильмов -->
+    <servlet>
+        <servlet-name>SimilarMoviesServlet</servlet-name>
+        <servlet-class>com.example.kino_search.servlet.recomendations.SimilarMoviesServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SimilarMoviesServlet</servlet-name>
+        <url-pattern>/similarMovies</url-pattern>
+    </servlet-mapping>
+
 </web-app>
