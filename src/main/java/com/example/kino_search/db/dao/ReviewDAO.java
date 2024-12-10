@@ -88,11 +88,19 @@ public class ReviewDAO {
         try (Connection conn = ConnectionManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
+
+
             stmt.setInt(1, filmId);
             try (ResultSet rs = stmt.executeQuery()) {
+
+
                 while (rs.next()) {
                     Map<String, Object> review = new HashMap<>();
-                    review.put("user_id", rs.getInt("user_id"));
+                    int userId = rs.getInt("user_id");
+                    String nickname = UserDAO.getUserNicknameById(userId);
+
+                    review.put("user_id", userId);
+                    review.put("user_nickname", nickname);
                     review.put("rating", rs.getInt("rating"));
                     review.put("review_text", rs.getString("review_text"));
                     review.put("created_at", rs.getTimestamp("created_at"));

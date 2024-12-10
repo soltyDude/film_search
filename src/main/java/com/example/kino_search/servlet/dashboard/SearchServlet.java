@@ -49,11 +49,11 @@ public class SearchServlet extends HttpServlet {
             for (int i = 0; i < results.size(); i++) {
                 JsonObject movie = results.get(i).getAsJsonObject();
                 Map<String, String> movieData = new HashMap<>();
-                movieData.put("id", movie.get("id").getAsString()); // Убедитесь, что ID добавляется
-
+                movieData.put("id", movie.get("id").getAsString()); // Убедитесь, что ID добавляетс
                 movieData.put("title", movie.get("title").getAsString());
-                movieData.put("overview", movie.get("overview").getAsString());
-                movieData.put("release_date", movie.get("release_date").getAsString());
+                //movieData.put("overview", movie.get("overview").getAsString());
+                //movieData.put("release_date", movie.get("release_date").getAsString());
+                //movieData.put("api_rating", movie.get("vote_average").getAsString());
 
                 // Добавляем постер, если он существует
                 if (movie.has("poster_path") && !movie.get("poster_path").isJsonNull()) {

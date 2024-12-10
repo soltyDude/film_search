@@ -120,7 +120,7 @@ public class FilmService {
 
 
     public static Map<String, Object> getFilmDetailsById(int filmId) {
-        String sql = "SELECT title, overview, release_date, poster_url, rating FROM film WHERE id = ?";
+        String sql = "SELECT title, overview, release_date, poster_url, api_rating, rating FROM film WHERE id = ?";
         Map<String, Object> movieDetails = new HashMap<>();
 
         try (Connection conn = ConnectionManager.getConnection();
@@ -133,6 +133,7 @@ public class FilmService {
                     movieDetails.put("overview", rs.getString("overview"));
                     movieDetails.put("release_date", rs.getDate("release_date").toString());
                     movieDetails.put("poster_url", rs.getString("poster_url"));
+                    movieDetails.put("api_rating", rs.getObject("api_rating")); // Может быть null
                     movieDetails.put("rating", rs.getObject("rating")); // Может быть null
                 }
             }

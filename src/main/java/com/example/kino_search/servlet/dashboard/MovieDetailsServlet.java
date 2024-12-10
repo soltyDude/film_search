@@ -3,19 +3,16 @@ package com.example.kino_search.servlet.dashboard;
 import com.example.kino_search.db.dao.PlaylistDAO;
 import com.example.kino_search.db.FilmService;
 import com.example.kino_search.db.dao.ReviewDAO;
-import com.example.kino_search.util.TMDBApiUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import com.google.gson.JsonObject;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
-
 
 public class MovieDetailsServlet extends HttpServlet {
 
@@ -26,22 +23,14 @@ public class MovieDetailsServlet extends HttpServlet {
         String movieAPIId = request.getParameter("id");
         logger.info("Received request for movie details. Query parameter 'apiId': " + movieAPIId);
 
-
-
-        HttpSession session = request.getSession(false); // false - чтобы избежать создания новой сессии
+        HttpSession session = request.getSession(false);
         Integer userId = null;
         if (session != null && session.getAttribute("userId") != null) {
             userId = (Integer) session.getAttribute("userId");
-
         } else {
-            logger.info("Received request for movie details. Query parameter 'userId': " + userId);
             response.sendRedirect("login.jsp");
+            return;
         }
-
-        logger.info("User ID retrieved from session: " + userId);
-
-        //добавляем фильм в датабазу если он когото заинтересовал
-        FilmService.fetchAndSaveFilm(Integer.parseInt(movieAPIId));
 
         if (movieAPIId == null || movieAPIId.trim().isEmpty()) {
             request.setAttribute("error", "Movie ID is required.");
@@ -50,9 +39,11 @@ public class MovieDetailsServlet extends HttpServlet {
         }
 
         try {
+            // Добавляем фильм в базу данных, если его ещё нет
+            FilmService.fetchAndSaveFilm(Integer.parseInt(movieAPIId));
+
             // Получаем информацию о фильме из базы данных
             int filmId = FilmService.getFilmIdByApiId(Integer.parseInt(movieAPIId));
-
             if (filmId == -1) {
                 throw new Exception("Film not found in the database for API ID: " + movieAPIId);
             }
@@ -62,11 +53,10 @@ public class MovieDetailsServlet extends HttpServlet {
 
             // Получаем ID плейлиста "Want to Watch" для текущего пользователя
             int playlistId = PlaylistDAO.getWantToWatchPlaylistId(userId);
-
-
             if (playlistId == -1) {
                 throw new Exception("Want to Watch playlist not found for user ID: " + userId);
             }
+
             // Получаем список отзывов
             List<Map<String, Object>> reviews = ReviewDAO.getReviewsByFilmId(filmId);
 
@@ -76,18 +66,15 @@ public class MovieDetailsServlet extends HttpServlet {
             request.setAttribute("release_date", movieDetails.get("release_date"));
             request.setAttribute("poster_url", movieDetails.get("poster_url"));
             request.setAttribute("apiId", movieAPIId);
-            request.setAttribute("playlistId", playlistId); // или другой ID плейлист
-            request.setAttribute("reviews", reviews); // Передаем отзывы
+            request.setAttribute("playlistId", playlistId);
+            request.setAttribute("reviews", reviews);
 
+            // Передаём рейтинг из API и внутренний рейтинг
+            request.setAttribute("api_rating", movieDetails.get("api_rating"));
+            request.setAttribute("rating", movieDetails.get("rating"));
+            request.setAttribute("internalRating", movieDetails.get("rating") != null ? movieDetails.get("rating") : "N/A");
 
-            // Рейтинг
-            Object rating = movieDetails.get("rating");
-            if (rating != null) {
-                request.setAttribute("rating", rating.toString());
-            } else {
-                request.setAttribute("rating", "N/A");
-            }
-
+            System.out.println(movieDetails.get("api_rating").toString());
             logger.info("Successfully retrieved movie details from the database for filmId: " + filmId);
 
         } catch (Exception e) {
@@ -99,6 +86,5 @@ public class MovieDetailsServlet extends HttpServlet {
         }
 
         request.getRequestDispatcher("movie.jsp").forward(request, response);
-
     }
 }
