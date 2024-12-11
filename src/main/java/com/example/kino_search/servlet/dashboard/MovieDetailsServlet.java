@@ -3,6 +3,8 @@ package com.example.kino_search.servlet.dashboard;
 import com.example.kino_search.db.dao.PlaylistDAO;
 import com.example.kino_search.db.FilmService;
 import com.example.kino_search.db.dao.ReviewDAO;
+import com.example.kino_search.db.dao.PlaylistDAO;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -74,6 +76,10 @@ public class MovieDetailsServlet extends HttpServlet {
             request.setAttribute("rating", movieDetails.get("rating"));
             request.setAttribute("internalRating", movieDetails.get("rating") != null ? movieDetails.get("rating") : "N/A");
 
+            // Получаем список плейлистов пользователя
+            List<Map<String, Object>> playlists = PlaylistDAO.getPlaylistsByUserId(userId);
+            request.setAttribute("playlists", playlists);
+
             System.out.println(movieDetails.get("api_rating").toString());
             logger.info("Successfully retrieved movie details from the database for filmId: " + filmId);
 
@@ -87,4 +93,5 @@ public class MovieDetailsServlet extends HttpServlet {
 
         request.getRequestDispatcher("movie.jsp").forward(request, response);
     }
+
 }

@@ -77,6 +77,32 @@
     .review em {
       color: #888;
     }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .modal h2 {
+      margin-bottom: 15px;
+    }
+    .modal form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .modal form select {
+      padding: 5px;
+      font-size: 16px;
+    }
+    .modal form button {
+      padding: 10px;
+    }
   </style>
 </head>
 <body>
@@ -109,7 +135,41 @@
       <input type="hidden" name="apiId" value="<%= request.getAttribute("apiId") %>">
       <button type="submit">Similar Movies</button>
     </form>
+
+    <button onclick="openPlaylistModal()">Add to Playlist</button>
   </div>
+
+  <!-- Modal for selecting playlist -->
+  <div id="playlistModal" class="modal">
+    <h2>Select Playlist</h2>
+    <form action="<%= request.getContextPath() %>/addFilmToPlaylist" method="post">
+      <input type="hidden" name="apiId" value="<%= request.getAttribute("apiId") %>">
+      <select name="playlistId" required>
+        <%
+          List<Map<String, Object>> playlists = (List<Map<String, Object>>) request.getAttribute("playlists");
+          if (playlists != null) {
+            for (Map<String, Object> playlist : playlists) {
+        %>
+        <option value="<%= playlist.get("id") %>"><%= playlist.get("name") %></option>
+        <%
+            }
+          }
+        %>
+      </select>
+      <button type="submit">Add</button>
+      <button type="button" onclick="closePlaylistModal()">Cancel</button>
+    </form>
+  </div>
+
+  <script>
+    function openPlaylistModal() {
+      document.getElementById('playlistModal').style.display = 'block';
+    }
+
+    function closePlaylistModal() {
+      document.getElementById('playlistModal').style.display = 'none';
+    }
+  </script>
 
   <div class="reviews">
     <h2>Reviews:</h2>

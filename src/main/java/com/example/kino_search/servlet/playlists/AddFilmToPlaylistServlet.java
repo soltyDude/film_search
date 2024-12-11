@@ -2,9 +2,8 @@ package com.example.kino_search.servlet.playlists;
 
 import com.example.kino_search.db.ConnectionManager;
 import com.example.kino_search.db.FilmService;
+import com.example.kino_search.db.dao.PlaylistDAO;
 import com.example.kino_search.db.dao.PlaylistFilmDAO;
-
-import com.example.kino_search.servlet.dashboard.MovieDetailsServlet;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,41 +18,39 @@ import java.util.logging.Logger;
 
 public class AddFilmToPlaylistServlet extends HttpServlet {
 
-    private static final Logger logger = Logger.getLogger(MovieDetailsServlet.class.getName());
+    private static final Logger logger = Logger.getLogger(AddFilmToPlaylistServlet.class.getName());
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String playlistId = request.getParameter("playlistId");
-        String apiId = request.getParameter("apiId");
+        String playlistIdParam = request.getParameter("playlistId");
+        String apiIdParam = request.getParameter("apiId");
 
+        logger.info("Received playlistId: " + playlistIdParam + ", apiId: " + apiIdParam);
 
-        logger.info("Received playlistId: " + playlistId + ", apiId: " + apiId);
-
-
-        if (playlistId == null || apiId == null) {
+        if (playlistIdParam == null || apiIdParam == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Playlist ID and API ID are required.");
-            request.getRequestDispatcher("/error.jsp").forward(request, response);
             return;
         }
 
         try {
-            // Логика добавления фильма в плейлист
-            int parsedPlaylistId = Integer.parseInt(playlistId);
-            int parsedApiId = Integer.parseInt(apiId);
+            int playlistId = Integer.parseInt(playlistIdParam);
+            int apiId = Integer.parseInt(apiIdParam);
 
-            // убедимся что есть в базе
-            FilmService.fetchAndSaveFilm(parsedApiId);
+            // Проверяем и сохраняем фильм в базе данных, если его там ещё нет
+            FilmService.fetchAndSaveFilm(apiId);
 
-            // Получаем ID фильма из базы
-            int filmId = getFilmIdByApiId(parsedApiId);
+            // Получаем ID фильма из базы данных
+            int filmId = FilmService.getFilmIdByApiId(apiId);
+            if (filmId == -1) {
+                throw new Exception("Film not found in the database for API ID: " + apiId);
+            }
 
-            // Добавляем связь между плейлистом и фильмом
-            boolean isAded = PlaylistFilmDAO.addFilmToPlaylist(parsedPlaylistId, filmId);
+            // Добавляем фильм в плейлист
+            boolean isAdded = PlaylistFilmDAO.addFilmToPlaylist(playlistId, filmId);
 
-
-            if (isAded) {
-                // Получите названия плейлиста и фильма для отображения
-                String playlistName = "whant to whatch"/*PlaylistDAO.getPlaylistName(parsedPlaylistId)*/;
+            if (isAdded) {
+                // Получаем названия плейлиста и фильма
+                String playlistName = PlaylistDAO.getPlaylistNameById(playlistId);
                 String filmTitle = FilmService.getFilmTitleByID(filmId);
 
                 request.setAttribute("playlistName", playlistName);
@@ -63,14 +60,17 @@ public class AddFilmToPlaylistServlet extends HttpServlet {
                 request.setAttribute("errorMessage", "This film already exists in the playlist.");
                 request.getRequestDispatcher("/error.jsp").forward(request, response);
             }
+        } catch (NumberFormatException e) {
+            logger.log(Level.SEVERE, "Invalid playlist ID or API ID format", e);
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid playlist ID or API ID format.");
         } catch (Exception e) {
-            logger.severe("Error processing request: " + e.getMessage());
+            logger.log(Level.SEVERE, "Error processing request", e);
             request.setAttribute("errorMessage", "An error occurred while processing your request.");
             request.getRequestDispatcher("/error.jsp").forward(request, response);
         }
     }
 
-    private int getFilmIdByApiId(int apiId) {
+private int getFilmIdByApiId(int apiId) {
         String sql = "SELECT id FROM film WHERE api_id = ?";
         try (Connection conn = ConnectionManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
