@@ -51,16 +51,28 @@
         .view-btn:hover {
             background-color: #0056b3;
         }
-        .create-link {
-            display: block;
-            text-align: center;
+        .create-form {
             margin: 20px 0;
-            color: #007BFF;
-            text-decoration: none;
-            font-size: 18px;
+            text-align: center;
         }
-        .create-link:hover {
-            text-decoration: underline;
+        .create-form input[type="text"] {
+            width: 70%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .create-form button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .create-form button:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
@@ -68,11 +80,19 @@
 <div class="container">
     <h1>Your Playlists</h1>
 
+    <!-- Форма для создания нового плейлиста -->
+    <div class="create-form">
+        <form action="<%= request.getContextPath() %>/createPlaylist" method="post">
+            <input type="text" name="playlistName" placeholder="Enter new playlist name" required>
+            <button type="submit">Create Playlist</button>
+        </form>
+    </div>
+
     <%
         List<Map<String, Object>> playlists = (List<Map<String, Object>>) request.getAttribute("playlists");
         if (playlists == null || playlists.isEmpty()) {
     %>
-    <p>You don't have any playlists yet. <a href="createPlaylist.jsp" class="create-link">Create one!</a></p>
+    <p>You don't have any playlists yet.</p>
     <%
     } else {
         for (Map<String, Object> playlist : playlists) {

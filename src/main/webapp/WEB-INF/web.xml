@@ -171,4 +171,16 @@
         <url-pattern>/similarMovies</url-pattern>
     </servlet-mapping>
 
+
+    <!-- для добаления новых плэйлистов -->
+    <servlet>
+        <servlet-name>CreatePlaylistServlet</servlet-name>
+        <servlet-class>com.example.kino_search.servlet.playlists.CreatePlaylistServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>CreatePlaylistServlet</servlet-name>
+        <url-pattern>/createPlaylist</url-pattern>
+    </servlet-mapping>
+
 </web-app>

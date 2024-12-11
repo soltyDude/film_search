@@ -115,5 +115,24 @@ public class PlaylistDAO {
         return playlistDetails;
     }
 
+    public static boolean createPlaylist(int userId, String playlistName) {
+        String query = """
+        INSERT INTO playlist (name, user_id, created_at, updated_at)
+        VALUES (?, ?, NOW(), NOW())
+    """;
+
+        try (Connection connection = ConnectionManager.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+
+            preparedStatement.setString(1, playlistName);
+            preparedStatement.setInt(2, userId);
+
+            return preparedStatement.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 }
 
