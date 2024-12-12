@@ -18,24 +18,28 @@ import java.sql.SQLException;
 
 public class LoginServlet extends HttpServlet {
 
+    //хранб в сесии userId user(ник)
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String email = request.getParameter("email");
         String password = request.getParameter("password");
 
         try (Connection conn = ConnectionManager.getConnection()) {
-            String sql = "SELECT password, nickname FROM users WHERE email = ?";
+            String sql = "SELECT id, password, nickname FROM users WHERE email = ?";
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, email);
-                ResultSet rs = stmt.executeQuery();
+                ResultSet sqlOutput = stmt.executeQuery();
 
-                if (rs.next()) {
-                    String storedPassword = ((ResultSet) rs).getString("password");
-                    String nickname = rs.getString("nickname");
+
+
+                if (sqlOutput.next()) {
+                    String storedPassword = sqlOutput.getString("password");
+                    String nickname = sqlOutput.getString("nickname");
 
                     if (BCrypt.checkpw(password, storedPassword)) {
                         HttpSession session = request.getSession();
                         session.setAttribute("user", nickname);
+                        session.setAttribute("userId", sqlOutput.getInt("id")); // Сохраняем userId как Integer
                         response.getWriter().write("Login successful!");
 
                         response.sendRedirect("dashboard.jsp");

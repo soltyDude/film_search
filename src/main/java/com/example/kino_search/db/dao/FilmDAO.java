@@ -7,6 +7,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -94,6 +96,55 @@ public class FilmDAO {
             e.printStackTrace();
         }
         return null; // Return null if no film is found or in case of an exception
+    }
+
+
+    public static Film getFilmById(int id) {
+        String sql = "SELECT * FROM film WHERE id = ?";
+        try (Connection conn = ConnectionManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                Film film = new Film();
+                film.setId(rs.getInt("id"));
+                film.setApiId(rs.getInt("api_id"));
+                film.setTitle(rs.getString("title"));
+                film.setReleaseDate(rs.getDate("release_date"));
+                film.setPosterUrl(rs.getString("poster_url"));
+                film.setRuntime(rs.getInt("runtime"));
+                film.setApiRating(rs.getFloat("api_rating"));
+                film.setRating(rs.getFloat("rating"));
+                film.setApiCount(rs.getInt("api_count"));
+                film.setCount(rs.getInt("count"));
+                film.setOverview(rs.getString("overview"));
+                return film;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null; // Return null if no film is found or in case of an exception
+    }
+
+    public static Map<String, Object> getRandomFilm() {
+        Map<String, Object> filmData = new HashMap<>();
+        String sql = "SELECT id, title, poster_url, api_id FROM film ORDER BY RANDOM() LIMIT 1";
+
+        try (Connection conn = ConnectionManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            if (rs.next()) {
+                filmData.put("id", rs.getInt("id"));
+                filmData.put("title", rs.getString("title"));
+                filmData.put("poster_url", rs.getString("poster_url"));
+                filmData.put("apiId", rs.getInt("api_id"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return filmData;
     }
 
 }

@@ -60,5 +60,154 @@
     </servlet-mapping>
 
 
+    <!-- добавиьть фильм -->
+    <servlet>
+        <servlet-name>AddFilmToPlaylistServlet</servlet-name>
+        <servlet-class>com.example.kino_search.servlet.playlists.AddFilmToPlaylistServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AddFilmToPlaylistServlet</servlet-name>
+        <url-pattern>/addFilmToPlaylist</url-pattern>
+    </servlet-mapping>
+
+    <!-- добавиьть фильм в просмотренные -->
+    <servlet>
+        <servlet-name>AddToWatchedServlet</servlet-name>
+        <servlet-class>com.example.kino_search.servlet.playlists.AddToWatchedServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AddToWatchedServlet</servlet-name>
+        <url-pattern>/addToWatched</url-pattern>
+    </servlet-mapping>
+
+    <!-- просмотр плэйлистов -->
+    <servlet>
+        <servlet-name>UserPlaylistsServlet</servlet-name>
+        <servlet-class>com.example.kino_search.servlet.playlists.UserPlaylistsServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>UserPlaylistsServlet</servlet-name>
+        <url-pattern>/playlists</url-pattern>
+    </servlet-mapping>
+
+    <!-- просмотр фильмов в плэйлистов -->
+    <servlet>
+        <servlet-name>ViewPlaylistServlet</servlet-name>
+        <servlet-class>com.example.kino_search.servlet.playlists.ViewPlaylistServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ViewPlaylistServlet</servlet-name>
+        <url-pattern>/viewPlaylist</url-pattern>
+    </servlet-mapping>
+
+    <!-- просмотр фильмов в просмотренных -->
+    <servlet>
+        <servlet-name>ViewedMoviesServlet</servlet-name>
+        <servlet-class>com.example.kino_search.servlet.playlists.ViewedMoviesServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ViewedMoviesServlet</servlet-name>
+        <url-pattern>/whatched</url-pattern>
+    </servlet-mapping>
+
+    <!-- абміт ревью -->
+    <servlet>
+        <servlet-name>ReviewServlet</servlet-name>
+        <servlet-class>com.example.kino_search.servlet.review.ReviewServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ReviewServlet</servlet-name>
+        <url-pattern>/addReview</url-pattern>
+    </servlet-mapping>
+
+
+    <!-- DefaultServlet для статических ресурсов -->
+    <servlet>
+        <servlet-name>default</servlet-name>
+        <servlet-class>org.apache.catalina.servlets.DefaultServlet</servlet-class>
+        <init-param>
+            <param-name>debug</param-name>
+            <param-value>0</param-value>
+        </init-param>
+        <init-param>
+            <param-name>listings</param-name>
+            <param-value>false</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>default</servlet-name>
+        <url-pattern>/resources/*</url-pattern>
+    </servlet-mapping>
+
+    <!-- для просмотра рекомендаций -->
+    <servlet>
+        <servlet-name>RecommendationServlet</servlet-name>
+        <servlet-class>com.example.kino_search.servlet.recomendations.RecommendationServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>RecommendationServlet</servlet-name>
+        <url-pattern>/recommendations</url-pattern>
+    </servlet-mapping>
+
+    <!-- для просмотра популярных -->
+    <servlet>
+        <servlet-name>PopularMoviesServlet</servlet-name>
+        <servlet-class>com.example.kino_search.servlet.popular.PopularMoviesServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>PopularMoviesServlet</servlet-name>
+        <url-pattern>/popular</url-pattern>
+    </servlet-mapping>
+
+    <!-- длядля копки просмотра похожих фильмов -->
+    <servlet>
+        <servlet-name>SimilarMoviesServlet</servlet-name>
+        <servlet-class>com.example.kino_search.servlet.recomendations.SimilarMoviesServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SimilarMoviesServlet</servlet-name>
+        <url-pattern>/similarMovies</url-pattern>
+    </servlet-mapping>
+
+
+    <!-- для добаления новых плэйлистов -->
+    <servlet>
+        <servlet-name>CreatePlaylistServlet</servlet-name>
+        <servlet-class>com.example.kino_search.servlet.playlists.CreatePlaylistServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>CreatePlaylistServlet</servlet-name>
+        <url-pattern>/createPlaylist</url-pattern>
+    </servlet-mapping>
+
+    <!-- для удалений из плэйлистов -->
+    <servlet>
+        <servlet-name>RemoveFilmFromPlaylistServlet</servlet-name>
+        <servlet-class>com.example.kino_search.servlet.playlists.RemoveFilmFromPlaylistServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>RemoveFilmFromPlaylistServlet</servlet-name>
+        <url-pattern>/removeFilmFromPlaylist</url-pattern>
+    </servlet-mapping>
+
+
+    <!-- RandomFilmServlet -->
+    <servlet>
+        <servlet-name>RandomFilmServlet</servlet-name>
+        <servlet-class>com.example.kino_search.servlet.rdandomFilm.RandomFilmServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>RandomFilmServlet</servlet-name>
+        <url-pattern>/randomFilm</url-pattern>
+    </servlet-mapping>
+
+
+    <listener>
+        <listener-class>com.example.kino_search.db.tmdb.StartupListener</listener-class>
+    </listener>
 
 </web-app>

@@ -8,7 +8,9 @@ import com.example.kino_search.util.TMDBApiUtil;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-import java.sql.Date;
+import java.sql.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,7 +26,6 @@ public class FilmService {
             Film existingFilm = FilmDAO.getFilmByApiId(apiId);
             if (existingFilm != null) {
                 logger.info("Film already exists in database: " + existingFilm.getTitle());
-                return;
             }
 
             // Запрос данных фильма из TMDB API
@@ -69,4 +70,76 @@ public class FilmService {
             logger.log(Level.SEVERE, "Error occurred while processing film with API ID: " + apiId, e);
         }
     }
+
+    public static String getFilmTitleByID(int id) {
+
+        String sql = "SELECT title FROM film WHERE id = ?";
+        try (Connection conn = ConnectionManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, id);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    String title = rs.getString("title");
+                    logger.info("Film title retrieved successfully for Film ID: " + id + ", Title: " + title);
+                    return title;
+                } else {
+                    logger.warning("No film found with ID: " + id);
+                }
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error retrieving film title for Film ID: " + id, e);
+        }
+        return null; // Return null if no film is found or an error occurred
+    }
+
+
+    public static Integer getFilmIdByApiId(int apiId) {
+        String sql = "SELECT id FROM film WHERE api_id = ?";
+        try (Connection conn = ConnectionManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, apiId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    int filmId = rs.getInt("id");
+                    logger.info("Film ID retrieved successfully for API ID: " + apiId + ", Film ID: " + filmId);
+                    return filmId;
+                } else {
+                    logger.warning("No film found with API ID: " + apiId);
+                }
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error retrieving film ID for API ID: " + apiId, e);
+        }
+        return null; // Return null if no film is found or an error occurred
+    }
+
+
+    public static Map<String, Object> getFilmDetailsById(int filmId) {
+        String sql = "SELECT title, overview, release_date, poster_url, api_rating, rating FROM film WHERE id = ?";
+        Map<String, Object> movieDetails = new HashMap<>();
+
+        try (Connection conn = ConnectionManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, filmId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    movieDetails.put("title", rs.getString("title"));
+                    movieDetails.put("overview", rs.getString("overview"));
+                    movieDetails.put("release_date", rs.getDate("release_date").toString());
+                    movieDetails.put("poster_url", rs.getString("poster_url"));
+                    movieDetails.put("api_rating", rs.getObject("api_rating")); // Может быть null
+                    movieDetails.put("rating", rs.getObject("rating")); // Может быть null
+                }
+            }
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error retrieving movie details for film ID: " + filmId, e);
+        }
+        return movieDetails;
+    }
+
 }

@@ -47,9 +47,13 @@
 
 <nav>
     <a href="search.jsp">Search Movies</a>
-    <a href="watchlist.jsp">My Watchlist</a>
+    <a href="playlists">Playlists</a>
+    <a href="whatched">Watched</a>
+    <a href="recommendations">Recommendations</a> <!-- Новая ссылка -->
+    <a href="popular">Popular Movies</a> <!-- Новая ссылка -->
     <a href="logout">Logout</a>
 </nav>
+
 
 <div class="container">
     <%
@@ -72,5 +76,41 @@
         }
     %>
 </div>
+<button id="randomBtn">Surprise Me!</button>
+
+<div id="roulette" style="display:none;">
+    <!-- Здесь может быть ваша анимация: например, анимированный GIF или CSS-анимация -->
+    <img src="resources/images/spinner.gif" alt="spinner">
+</div>
+
+<div id="randomResult" style="display:none;"></div>
+
+<script>
+    document.getElementById('randomBtn').addEventListener('click', function() {
+        // Показываем рулетку (spinner)
+        document.getElementById('roulette').style.display = 'block';
+
+        // Пример использования fetch API для AJAX-запроса
+        fetch('<%= request.getContextPath() %>/randomFilm')
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.text();
+            })
+            .then(html => {
+                // Прячем рулетку
+                document.getElementById('roulette').style.display = 'none';
+                // Показываем результат
+                document.getElementById('randomResult').style.display = 'block';
+                document.getElementById('randomResult').innerHTML = html;
+            })
+            .catch(error => {
+                console.error('Error fetching random film:', error);
+                document.getElementById('roulette').style.display = 'none';
+                document.getElementById('randomResult').innerHTML = '<p>Sorry, something went wrong.</p>';
+                document.getElementById('randomResult').style.display = 'block';
+            });
+    });
+</script>
+
 </body>
 </html>
