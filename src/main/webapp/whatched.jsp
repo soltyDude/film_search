@@ -62,6 +62,14 @@
       </a>
       <h3><%= movie.get("title") %></h3>
       <p class="viewed-at">Viewed at: <%= movie.get("viewed_at") %></p>
+      <%
+        Object ratingObj = movie.get("rating");
+        if (ratingObj != null) {
+      %>
+      <p>Your rating: <%= ratingObj %></p>
+      <%
+        }
+      %>
     </div>
     <%
       }

@@ -91,12 +91,14 @@ public class ViewedMoviesDAO {
     // Получение списка просмотренных фильмов для пользователя
     public static List<Map<String, Object>> getViewedMoviesByUserId(int userId) {
         String sql = """
-            SELECT v.viewed_at, f.api_id, f.title, f.poster_url 
-            FROM viewed_movies v
-            JOIN film f ON v.film_id = f.id
-            WHERE v.user_id = ?
-            ORDER BY v.viewed_at DESC
-        """;
+        SELECT v.viewed_at, f.api_id, f.title, f.poster_url, r.rating
+        FROM viewed_movies v
+        JOIN film f ON v.film_id = f.id
+        LEFT JOIN reviews r ON r.user_id = v.user_id AND r.film_id = v.film_id
+        WHERE v.user_id = ?
+        ORDER BY v.viewed_at DESC
+    """;
+
         List<Map<String, Object>> viewedMovies = new ArrayList<>();
 
         try (Connection conn = ConnectionManager.getConnection();
@@ -111,6 +113,14 @@ public class ViewedMoviesDAO {
                     movie.put("apiId", rs.getInt("api_id"));
                     movie.put("title", rs.getString("title"));
                     movie.put("poster_url", rs.getString("poster_url"));
+
+                    int rating = rs.getInt("rating");
+                    if (rs.wasNull()) {
+                        movie.put("rating", null); // или можно просто не класть ключ, если нет рейтинга
+                    } else {
+                        movie.put("rating", rating);
+                    }
+
                     viewedMovies.add(movie);
                 }
             }
@@ -120,6 +130,7 @@ public class ViewedMoviesDAO {
 
         return viewedMovies;
     }
+
 
     // Обновление записи о просмотренном фильме (например, добавление review_id)
     public static boolean updateViewedMovie(int userId, int filmId, Integer reviewId) {
