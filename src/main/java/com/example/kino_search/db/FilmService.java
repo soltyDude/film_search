@@ -24,9 +24,9 @@ public class FilmService {
         try {
             // Проверяем, существует ли фильм в базе
             Film existingFilm = FilmDAO.getFilmByApiId(apiId);
+
             if (existingFilm != null) {
                 logger.info("Film already exists in database: " + existingFilm.getTitle());
-                return;
             }
 
             // Запрос данных фильма из TMDB API
@@ -34,8 +34,9 @@ public class FilmService {
             logger.info("Sending request to TMDB API for endpoint: " + endpoint);
             JsonObject movieDetails = TMDBApiUtil.sendRequest(endpoint);
 
-            // Создание объекта Film
-            Film film = new Film();
+            // Создание или обновление объекта Film
+            Film film = existingFilm != null ? existingFilm : new Film();
+
             film.setApiId(apiId);
             film.setTitle(movieDetails.get("title").getAsString());
             film.setReleaseDate(Date.valueOf(movieDetails.get("release_date").getAsString()));
@@ -44,6 +45,12 @@ public class FilmService {
             film.setApiRating(movieDetails.get("vote_average").getAsFloat());
             film.setApiCount(movieDetails.get("vote_count").getAsInt());
             film.setOverview(movieDetails.get("overview").getAsString());
+
+            // Если фильм уже существует, сохраняем его `rating` и `count`
+            if (existingFilm != null) {
+                film.setRating(existingFilm.getRating());
+                film.setCount(existingFilm.getCount());
+            }
 
             // Сохраняем фильм
             logger.info("Saving film to database: " + film.getTitle());
@@ -71,6 +78,7 @@ public class FilmService {
             logger.log(Level.SEVERE, "Error occurred while processing film with API ID: " + apiId, e);
         }
     }
+
 
     public static String getFilmTitleByID(int id) {
 
