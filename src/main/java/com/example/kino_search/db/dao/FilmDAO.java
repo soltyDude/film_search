@@ -7,6 +7,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -125,5 +127,24 @@ public class FilmDAO {
         return null; // Return null if no film is found or in case of an exception
     }
 
+    public static Map<String, Object> getRandomFilm() {
+        Map<String, Object> filmData = new HashMap<>();
+        String sql = "SELECT id, title, poster_url, api_id FROM film ORDER BY RANDOM() LIMIT 1";
+
+        try (Connection conn = ConnectionManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            if (rs.next()) {
+                filmData.put("id", rs.getInt("id"));
+                filmData.put("title", rs.getString("title"));
+                filmData.put("poster_url", rs.getString("poster_url"));
+                filmData.put("apiId", rs.getInt("api_id"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return filmData;
+    }
 
 }

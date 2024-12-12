@@ -194,5 +194,16 @@
     </servlet-mapping>
 
 
+    <!-- RandomFilmServlet -->
+    <servlet>
+        <servlet-name>RandomFilmServlet</servlet-name>
+        <servlet-class>com.example.kino_search.servlet.rdandomFilm.RandomFilmServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>RandomFilmServlet</servlet-name>
+        <url-pattern>/randomFilm</url-pattern>
+    </servlet-mapping>
+
 
 </web-app>
