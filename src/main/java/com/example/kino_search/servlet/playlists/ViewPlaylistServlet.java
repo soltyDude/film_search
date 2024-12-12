@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -34,7 +35,13 @@ public class ViewPlaylistServlet extends HttpServlet {
                 return;
             }
 
+//            List<Map<String,Object>> films = (List<Map<String,Object>>) playlistDetails.get("films");
+//            for (Map<String,Object> f : films) {
+//                System.out.println("Film data: " + f);
+//            }
+
             // Передаём данные плейлиста в JSP
+            request.setAttribute("playlistId", playlistId); // Добавлено
             request.setAttribute("playlistName", playlistDetails.get("name"));
             request.setAttribute("films", playlistDetails.get("films"));
             request.getRequestDispatcher("viewPlaylist.jsp").forward(request, response);

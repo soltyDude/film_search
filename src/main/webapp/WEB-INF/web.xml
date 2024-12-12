@@ -177,10 +177,20 @@
         <servlet-name>CreatePlaylistServlet</servlet-name>
         <servlet-class>com.example.kino_search.servlet.playlists.CreatePlaylistServlet</servlet-class>
     </servlet>
-
     <servlet-mapping>
         <servlet-name>CreatePlaylistServlet</servlet-name>
         <url-pattern>/createPlaylist</url-pattern>
+    </servlet-mapping>
+
+    <!-- для удалений из плэйлистов -->
+    <servlet>
+        <servlet-name>RemoveFilmFromPlaylistServlet</servlet-name>
+        <servlet-class>com.example.kino_search.servlet.playlists.RemoveFilmFromPlaylistServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>RemoveFilmFromPlaylistServlet</servlet-name>
+        <url-pattern>/removeFilmFromPlaylist</url-pattern>
     </servlet-mapping>
 
 </web-app>

@@ -134,5 +134,26 @@ public class PlaylistDAO {
         }
     }
 
+    public static String getPlaylistNameById(int playlistId) {
+        String sql = """
+        SELECT name FROM playlist WHERE id = ?""";
+
+        try (Connection conn = ConnectionManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, playlistId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("name");
+                }
+            }
+        } catch (SQLException e) {
+            logger.severe("Error retrieving playlist name for playlist ID " + playlistId + ": " + e.getMessage());
+        }
+
+        return null; // Если плейлист не найден
+    }
+
 }
 
