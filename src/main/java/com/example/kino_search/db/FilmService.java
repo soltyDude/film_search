@@ -26,7 +26,6 @@ public class FilmService {
             Film existingFilm = FilmDAO.getFilmByApiId(apiId);
             if (existingFilm != null) {
                 logger.info("Film already exists in database: " + existingFilm.getTitle());
-                return;
             }
 
             // Запрос данных фильма из TMDB API

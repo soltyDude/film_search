@@ -206,4 +206,8 @@
     </servlet-mapping>
 
 
+    <listener>
+        <listener-class>com.example.kino_search.db.tmdb.StartupListener</listener-class>
+    </listener>
+
 </web-app>

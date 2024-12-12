@@ -1,5 +1,6 @@
 package com.example.kino_search.servlet.dashboard;
 
+import com.example.kino_search.db.FilmService;
 import com.example.kino_search.util.TMDBApiUtil;
 import com.example.kino_search.filter.ValidMovieFilter;
 import com.google.gson.JsonArray;
@@ -44,12 +45,19 @@ public class SearchServlet extends HttpServlet {
             // Получаем массив результатов
             JsonArray results = jsonObject.getAsJsonArray("results");
 
+            int apiID;
             // Преобразуем JSON в список фильмов
             List<Map<String, String>> movies = new ArrayList<>();
             for (int i = 0; i < results.size(); i++) {
+
                 JsonObject movie = results.get(i).getAsJsonObject();
+                apiID = Integer.parseInt(movie.get("id").getAsString());
+
+                //save or update
+                FilmService.fetchAndSaveFilm(Integer.parseInt(String.valueOf(apiID)));
+
                 Map<String, String> movieData = new HashMap<>();
-                movieData.put("id", movie.get("id").getAsString()); // Убедитесь, что ID добавляетс
+                movieData.put("id", String.valueOf(apiID)); // Убедитесь, что ID добавляетс
                 movieData.put("title", movie.get("title").getAsString());
                 //movieData.put("overview", movie.get("overview").getAsString());
                 //movieData.put("release_date", movie.get("release_date").getAsString());
