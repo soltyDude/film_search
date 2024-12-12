@@ -22,22 +22,24 @@ public class ReviewServlet extends HttpServlet {
 
             int filmId = FilmService.getFilmIdByApiId(filmAPIId);
 
-            if (ReviewDAO.isReviewExists(userId, filmId)) {
-                request.setAttribute("errorMessage", "You have already submitted a review for this movie.");
-                request.getRequestDispatcher("error.jsp").forward(request, response);
-                return;
-            }
-
             // Проверяем, существует ли фильм в просмотренных, если нет - добавляем
             if (!ViewedMoviesDAO.isMovieInViewed(userId, filmId)) {
                 ViewedMoviesDAO.addMovieToViewed(userId, filmId, null);
             }
 
-            // Добавляем отзыв в базу данных
-            boolean success = ReviewDAO.addReview(userId, filmAPIId, rating, reviewText);
+            boolean reviewExists = ReviewDAO.isReviewExists(userId, filmId);
+
+            boolean success;
+            if (reviewExists) {
+                // Обновляем отзыв
+                success = ReviewDAO.updateReview(userId, filmId, rating, reviewText);
+            } else {
+                // Добавляем отзыв
+                success = ReviewDAO.addReview(userId, filmAPIId, rating, reviewText);
+            }
 
             if (success) {
-                response.sendRedirect("movie?id=" + filmAPIId); // Перенаправление на страницу фильма
+                response.sendRedirect("movie?id=" + filmAPIId);
             } else {
                 request.setAttribute("errorMessage", "Failed to submit the review. Try again.");
                 request.getRequestDispatcher("error.jsp").forward(request, response);
@@ -48,4 +50,5 @@ public class ReviewServlet extends HttpServlet {
             request.getRequestDispatcher("error.jsp").forward(request, response);
         }
     }
+
 }

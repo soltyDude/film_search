@@ -140,4 +140,84 @@ public class ReviewDAO {
         return reviews;
     }
 
+    public static Map<String, Object> getReviewByUserAndFilm(int userId, int filmId) {
+        String sql = "SELECT rating, review_text FROM reviews WHERE user_id = ? AND film_id = ?";
+        try (Connection conn = ConnectionManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, userId);
+            stmt.setInt(2, filmId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    Map<String, Object> review = new HashMap<>();
+                    review.put("rating", rs.getInt("rating"));
+                    String reviewText = rs.getString("review_text");
+                    review.put("review_text", reviewText);
+                    return review;
+                }
+            }
+        } catch (SQLException e) {
+            Logger.getLogger(ReviewDAO.class.getName()).log(Level.SEVERE, "Error fetching review by user and film", e);
+        }
+        return null;
+    }
+
+    public static boolean updateReview(int userId, int filmId, int newRating, String newReviewText) {
+        // Обновляем отзыв
+        String updateReviewSql = """
+        UPDATE reviews
+        SET rating = ?, review_text = ?, updated_at = CURRENT_TIMESTAMP
+        WHERE user_id = ? AND film_id = ?
+    """;
+
+        // После обновления отзыва нужно пересчитать рейтинг фильма.
+        // Посчитаем заново средний рейтинг и количество отзывов для этого фильма.
+        String avgSql = "SELECT AVG(rating) as avg_rating, COUNT(*) as cnt FROM reviews WHERE film_id = ?";
+
+        String updateFilmSql = """
+        UPDATE film
+        SET rating = ?, count = ?
+        WHERE id = ?
+    """;
+
+        try (Connection conn = ConnectionManager.getConnection();
+             PreparedStatement updateReviewStmt = conn.prepareStatement(updateReviewSql);
+             PreparedStatement avgStmt = conn.prepareStatement(avgSql);
+             PreparedStatement updateFilmStmt = conn.prepareStatement(updateFilmSql)) {
+
+            updateReviewStmt.setInt(1, newRating);
+            updateReviewStmt.setString(2, newReviewText);
+            updateReviewStmt.setInt(3, userId);
+            updateReviewStmt.setInt(4, filmId);
+
+            int reviewRows = updateReviewStmt.executeUpdate();
+            if (reviewRows == 0) {
+                // Не найден отзыв для обновления
+                return false;
+            }
+
+            // Пересчёт среднего рейтинга
+            avgStmt.setInt(1, filmId);
+            double avgRating = 0;
+            int count = 0;
+            try (ResultSet rs = avgStmt.executeQuery()) {
+                if (rs.next()) {
+                    avgRating = rs.getDouble("avg_rating");
+                    count = rs.getInt("cnt");
+                }
+            }
+
+            // Обновляем рейтинг фильма
+            updateFilmStmt.setDouble(1, avgRating);
+            updateFilmStmt.setInt(2, count);
+            updateFilmStmt.setInt(3, filmId);
+            updateFilmStmt.executeUpdate();
+
+            return true;
+        } catch (SQLException e) {
+            Logger.getLogger(ReviewDAO.class.getName()).log(Level.SEVERE, "Error updating review and film rating", e);
+        }
+        return false;
+    }
+
+
 }

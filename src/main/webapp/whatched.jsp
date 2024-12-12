@@ -45,6 +45,20 @@
       color: #888;
       font-size: 12px;
     }
+    .review-button {
+      margin-top: 10px;
+    }
+    .review-button button {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .review-button button:hover {
+      background-color: #0056b3;
+    }
   </style>
 </head>
 <body>
@@ -53,8 +67,10 @@
   <div class="movie-list">
     <%
       List<Map<String, Object>> viewedMovies = (List<Map<String, Object>>) request.getAttribute("viewedMovies");
+      Integer userId = (Integer) session.getAttribute("userId"); // Предполагается, что userId хранится в сессии
       if (viewedMovies != null && !viewedMovies.isEmpty()) {
         for (Map<String, Object> movie : viewedMovies) {
+          Object ratingObj = movie.get("rating");
     %>
     <div class="movie-item">
       <a href="movie?id=<%= movie.get("apiId") %>">
@@ -63,10 +79,28 @@
       <h3><%= movie.get("title") %></h3>
       <p class="viewed-at">Viewed at: <%= movie.get("viewed_at") %></p>
       <%
-        Object ratingObj = movie.get("rating");
         if (ratingObj != null) {
       %>
       <p>Your rating: <%= ratingObj %></p>
+      <div class="review-button">
+        <!-- Кнопка для редактирования отзыва -->
+        <form action="<%= request.getContextPath() %>/reviewForm.jsp" method="get">
+          <input type="hidden" name="apiId" value="<%= movie.get("apiId") %>">
+          <input type="hidden" name="userId" value="<%= userId %>">
+          <button type="submit">Edit Review</button>
+        </form>
+      </div>
+      <%
+      } else {
+      %>
+      <div class="review-button">
+        <!-- Кнопка для добавления отзыва -->
+        <form action="<%= request.getContextPath() %>/reviewForm.jsp" method="get">
+          <input type="hidden" name="apiId" value="<%= movie.get("apiId") %>">
+          <input type="hidden" name="userId" value="<%= userId %>">
+          <button type="submit">Add Review</button>
+        </form>
+      </div>
       <%
         }
       %>
