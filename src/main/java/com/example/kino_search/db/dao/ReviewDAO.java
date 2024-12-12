@@ -24,14 +24,6 @@ public class ReviewDAO {
         RETURNING id
     """;
 
-        String updateFilmSql = """
-        UPDATE film
-        SET 
-            rating = (rating * count + ?) / (count + 1),
-            count = count + 1
-        WHERE id = ?
-    """;
-
         String updateViewedMovieSql = """
         UPDATE viewed_movies
         SET reviews_id = ?
@@ -40,7 +32,6 @@ public class ReviewDAO {
 
         try (Connection conn = ConnectionManager.getConnection();
              PreparedStatement reviewStmt = conn.prepareStatement(reviewSql);
-             PreparedStatement updateFilmStmt = conn.prepareStatement(updateFilmSql);
              PreparedStatement updateViewedMovieStmt = conn.prepareStatement(updateViewedMovieSql)) {
 
             int filmId = FilmService.getFilmIdByApiId(filmAPIId);
@@ -51,7 +42,6 @@ public class ReviewDAO {
             reviewStmt.setInt(3, rating);
             reviewStmt.setString(4, reviewText);
 
-            // Получаем ID созданного отзыва
             int reviewId = -1;
             try (ResultSet rs = reviewStmt.executeQuery()) {
                 if (rs.next()) {
@@ -63,25 +53,23 @@ public class ReviewDAO {
                 throw new SQLException("Failed to retrieve the generated review ID.");
             }
 
-            // Обновляем данные фильма
-            updateFilmStmt.setInt(1, rating);
-            updateFilmStmt.setInt(2, filmId);
-            int filmRowsAffected = updateFilmStmt.executeUpdate();
-
             // Обновляем поле reviews_id в просмотренных фильмах
             updateViewedMovieStmt.setInt(1, reviewId);
             updateViewedMovieStmt.setInt(2, userId);
             updateViewedMovieStmt.setInt(3, filmId);
             int viewedMovieRowsAffected = updateViewedMovieStmt.executeUpdate();
 
-            logger.info("Review added, film rating updated, and movie's reviews_id updated: User ID = " + userId + ", Film ID = " + filmId + ", Review ID = " + reviewId + ", Rating = " + rating);
-            return filmRowsAffected > 0 && viewedMovieRowsAffected > 0;
+            logger.info("Review added and movie's reviews_id updated: User ID = " + userId + ", Film ID = " + filmId + ", Review ID = " + reviewId + ", Rating = " + rating);
+
+            // Поскольку обновление рейтинга убрано, проверим только успешность добавления отзыва.
+            return viewedMovieRowsAffected > 0;
 
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Error adding review, updating film rating, and updating viewed movie's reviews_id", e);
+            logger.log(Level.SEVERE, "Error adding review and updating viewed_movie's reviews_id", e);
             return false;
         }
     }
+
 
 
 

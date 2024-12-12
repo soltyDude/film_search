@@ -26,6 +26,7 @@ public class FilmService {
             Film existingFilm = FilmDAO.getFilmByApiId(apiId);
             if (existingFilm != null) {
                 logger.info("Film already exists in database: " + existingFilm.getTitle());
+                return;
             }
 
             // Запрос данных фильма из TMDB API
@@ -134,12 +135,68 @@ public class FilmService {
                     movieDetails.put("poster_url", rs.getString("poster_url"));
                     movieDetails.put("api_rating", rs.getObject("api_rating")); // Может быть null
                     movieDetails.put("rating", rs.getObject("rating")); // Может быть null
+                    logger.info("Fetched film details: " +  rs.getObject("rating"));
                 }
             }
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Error retrieving movie details for film ID: " + filmId, e);
         }
         return movieDetails;
+    }
+
+    public static boolean updateFilmRatingAndCount(int filmId, int newRating, boolean isUpdate) {
+        String updateQuery;
+        if (isUpdate) {
+            updateQuery = """
+            UPDATE film
+            SET rating = (rating * count + ?) / count
+            WHERE id = ?
+        """;
+        } else {
+            updateQuery = """
+            UPDATE film
+            SET rating = (rating * count + ?) / (count + 1),
+                count = count + 1
+            WHERE id = ?
+        """;
+        }
+
+        logger.info("Updating film: filmId=" + filmId + ", newRating=" + newRating + ", isUpdate=" + isUpdate);
+
+        try (Connection conn = ConnectionManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(updateQuery)) {
+
+            stmt.setInt(1, newRating);
+            stmt.setInt(2, filmId);
+
+            logger.info("Executing query: " + updateQuery);
+            logger.info("Query parameters: newRating=" + newRating + ", filmId=" + filmId);
+
+            int rowsUpdated = stmt.executeUpdate();
+            if (rowsUpdated > 0) {
+                logger.info("Successfully updated film rating and count. Rows updated: " + rowsUpdated);
+                return true;
+            } else {
+                logger.warning("No rows were updated for film ID: " + filmId);
+            }
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error updating film rating and count for film ID: " + filmId, e);
+        }
+        return false;
+    }
+
+    public static void testUpdateFilmRatingAndCount() {
+        int testFilmId = 1; // Замените на существующий ID фильма
+        int newRating = 8;
+        boolean isUpdate = false; // Используйте true для обновления рейтинга
+
+        boolean result = updateFilmRatingAndCount(testFilmId, newRating, isUpdate);
+
+        if (result) {
+            logger.info("Test passed: Film rating and count updated successfully.");
+        } else {
+            logger.warning("Test failed: Film rating and count were not updated.");
+        }
     }
 
 }
