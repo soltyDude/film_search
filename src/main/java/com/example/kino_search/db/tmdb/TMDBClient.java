@@ -8,7 +8,7 @@ import com.google.gson.JsonParser;
 
 public class TMDBClient {
 
-    private static final String API_KEY = "ВАШ_КЛЮЧ_ТМДБ";
+    private static final String API_KEY = "e28fe83118014486bd75c60ecd32ede4";
     private static final String BASE_URL = "https://api.themoviedb.org/3";
 
     public static JsonObject fetchPopularMovies() throws Exception {
