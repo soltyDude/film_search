@@ -1,27 +1,26 @@
 package com.example.kino_search.db;
 
-import com.example.kino_search.property.PropertyManager;
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
-
-import javax.sql.DataSource;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class ConnectionManager {
-    private static final HikariDataSource dataSource;
+    private static final String DB_URL = "jdbc:postgresql://db:5432/mydb";
+    private static final String DB_USER = "myuser";
+    private static final String DB_PASSWORD = "mypassword";
 
     static {
-        HikariConfig config = new HikariConfig();
-        config.setJdbcUrl(PropertyManager.getProperty("db.url"));
-        config.setUsername(PropertyManager.getProperty("db.username"));
-        config.setPassword(PropertyManager.getProperty("db.password"));
-        config.setDriverClassName("org.postgresql.Driver");
-        config.setMaximumPoolSize(10);
-        dataSource = new HikariDataSource(config);
+        try {
+            // Явная загрузка драйвера (опционально)
+            Class.forName("org.postgresql.Driver");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            // Логирование или обработка ошибки
+        }
     }
 
-    public static Connection getConnection() throws SQLException, SQLException {
-        return dataSource.getConnection();
+    public static Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
     }
 }
+
