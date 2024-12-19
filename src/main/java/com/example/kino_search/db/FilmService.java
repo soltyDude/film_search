@@ -207,4 +207,41 @@ public class FilmService {
         }
     }
 
+    public static boolean updateFilmRatingAndCount(int filmId) {
+        String avgSql = "SELECT AVG(rating) as avg_rating, COUNT(*) as cnt FROM reviews WHERE film_id = ?";
+        String updateFilmSql = "UPDATE film SET rating = ?, count = ? WHERE id = ?";
+
+        try (Connection conn = ConnectionManager.getConnection();
+             PreparedStatement avgStmt = conn.prepareStatement(avgSql);
+             PreparedStatement updateStmt = conn.prepareStatement(updateFilmSql)) {
+
+            avgStmt.setInt(1, filmId);
+            double avgRating = 0.0;
+            int count = 0;
+
+            try (ResultSet rs = avgStmt.executeQuery()) {
+                if (rs.next()) {
+                    avgRating = rs.getDouble("avg_rating");
+                    count = rs.getInt("cnt");
+                }
+            }
+
+            if (count == 0) {
+                updateStmt.setNull(1, Types.NUMERIC); // Нет отзывов - рейтинг неизвестен
+                updateStmt.setInt(2, 0);
+            } else {
+                double roundedRating = Math.round(avgRating * 10) / 10.0;
+                updateStmt.setDouble(1, roundedRating);
+                updateStmt.setInt(2, count);
+            }
+
+            updateStmt.setInt(3, filmId);
+            int rows = updateStmt.executeUpdate();
+            return rows > 0;
+        } catch (SQLException e) {
+            Logger.getLogger(FilmService.class.getName()).log(Level.SEVERE, "Error updating film rating", e);
+        }
+        return false;
+    }
+
 }

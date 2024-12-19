@@ -15,17 +15,18 @@ public class RecommendationServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
-            // Получаем userId из сессии
+            // Retrieve userId from the session
             Integer userId = (Integer) request.getSession().getAttribute("userId");
             if (userId == null) {
+                // If not logged in, redirect to login page
                 response.sendRedirect("login.jsp");
                 return;
             }
 
-            // Получаем список рекомендаций через UserDAO
+            // Fetch recommendation list through UserDAO
             List<Map<String, String>> recommendations = UserDAO.getRecommendedMovies(userId);
 
-            // Передаём данные в JSP
+            // Pass the data to JSP
             request.setAttribute("recommendations", recommendations);
             request.getRequestDispatcher("recommendations.jsp").forward(request, response);
 

@@ -6,6 +6,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -22,22 +23,23 @@ public class RegisterServlet extends HttpServlet {
         String password = request.getParameter("password");
         String confirmPassword = request.getParameter("confirmPassword");
 
-        // Проверка паролей
+        // Check if passwords match
         if (!password.equals(confirmPassword)) {
             response.getWriter().write("Passwords do not match!");
             return;
         }
 
+        // Validate the password strength
         if (!PasswordValidator.validate(password)) {
             response.getWriter().write("Password does not meet security requirements!");
             return;
         }
 
-        // Хешируем пароль
+        // Hash the password
         String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
 
         try (Connection conn = ConnectionManager.getConnection()) {
-            // Проверяем, существует ли email в базе
+            // Check if the email is already in use
             String checkEmailSql = "SELECT COUNT(*) FROM users WHERE email = ?";
             try (PreparedStatement checkStmt = conn.prepareStatement(checkEmailSql)) {
                 checkStmt.setString(1, email);
@@ -49,32 +51,46 @@ public class RegisterServlet extends HttpServlet {
                 }
             }
 
-            // Если email не найден, добавляем пользователя
+            // Insert the new user record
             String insertSql = "INSERT INTO users (nickname, email, password, created_at) VALUES (?, ?, ?, NOW())";
+            int userId;
             try (PreparedStatement stmt = conn.prepareStatement(insertSql, PreparedStatement.RETURN_GENERATED_KEYS)) {
                 stmt.setString(1, nickname);
                 stmt.setString(2, email);
                 stmt.setString(3, hashedPassword);
                 stmt.executeUpdate();
 
-                // Получаем сгенерированный ID нового пользователя
+                // Retrieve the generated user ID
                 try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
-                        int userId = generatedKeys.getInt(1);
-
-                        // Создаем плейлист "Want to Watch" для нового пользователя
-                        String createPlaylistSql = "INSERT INTO playlist (name, user_id, created_at, updated_at) VALUES (?, ?, NOW(), NOW())";
-                        try (PreparedStatement playlistStmt = conn.prepareStatement(createPlaylistSql)) {
-                            playlistStmt.setString(1, "Want to Watch");
-                            playlistStmt.setInt(2, userId);
-                            playlistStmt.executeUpdate();
-                        }
+                        userId = generatedKeys.getInt(1);
+                    } else {
+                        response.getWriter().write("Failed to register user.");
+                        return;
                     }
                 }
             }
 
-            response.getWriter().write("User registered successfully!");
+            // Create the "Want to Watch" playlist for the new user
+            String createPlaylistSql = "INSERT INTO playlist (name, user_id, created_at, updated_at) VALUES (?, ?, NOW(), NOW())";
+            try (PreparedStatement playlistStmt = conn.prepareStatement(createPlaylistSql)) {
+                playlistStmt.setString(1, "Want to Watch");
+                playlistStmt.setInt(2, userId);
+                playlistStmt.executeUpdate();
+            }
+
+            // After successful registration, automatically log the user in:
+            HttpSession oldSession = request.getSession(false);
+            if (oldSession != null) {
+                oldSession.invalidate();
+            }
+            HttpSession session = request.getSession(true);
+            session.setAttribute("user", nickname);
+            session.setAttribute("userId", userId);
+
+            // Redirect the user to the dashboard
             response.sendRedirect("dashboard.jsp");
+
         } catch (SQLException e) {
             e.printStackTrace();
             response.getWriter().write("Error: " + e.getMessage());

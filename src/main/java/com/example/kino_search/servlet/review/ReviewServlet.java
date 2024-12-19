@@ -47,7 +47,8 @@ public class ReviewServlet extends HttpServlet {
             }
 
             if (success) {
-                boolean updatedRating = FilmService.updateFilmRatingAndCount(filmId, rating, reviewExists);
+                // После успешного добавления/обновления отзыва пересчитываем рейтинг фильма
+                boolean updatedRating = FilmService.updateFilmRatingAndCount(filmId);
                 logger.info("Updated film rating and count: " + updatedRating);
 
                 response.sendRedirect("movie?id=" + filmAPIId);
@@ -56,6 +57,7 @@ public class ReviewServlet extends HttpServlet {
                 request.setAttribute("errorMessage", "Failed to submit the review. Try again.");
                 request.getRequestDispatcher("error.jsp").forward(request, response);
             }
+
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error processing review submission", e);
             request.setAttribute("errorMessage", "An error occurred while processing your review.");

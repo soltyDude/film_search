@@ -28,6 +28,7 @@ public class SimilarMoviesServlet extends HttpServlet {
         }
 
         try {
+            // Fetch similar movies from TMDB API
             String endpoint = "/movie/" + apiId + "/similar";
             JsonObject jsonResponse = TMDBApiUtil.sendRequest(endpoint);
 
@@ -47,6 +48,7 @@ public class SimilarMoviesServlet extends HttpServlet {
                 }
             }
 
+            // Forward the data to JSP
             request.setAttribute("similarMovies", similarMovies);
             request.getRequestDispatcher("similarMovies.jsp").forward(request, response);
 

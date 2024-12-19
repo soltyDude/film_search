@@ -37,9 +37,15 @@ public class LoginServlet extends HttpServlet {
                     String nickname = sqlOutput.getString("nickname");
 
                     if (BCrypt.checkpw(password, storedPassword)) {
-                        HttpSession session = request.getSession();
+
+                        HttpSession oldSession = request.getSession(false);
+                        if (oldSession != null) {
+                            oldSession.invalidate(); // уничтожаем старую сессию
+                        }
+                        HttpSession session = request.getSession(true); // создаём новую сессию
                         session.setAttribute("user", nickname);
-                        session.setAttribute("userId", sqlOutput.getInt("id")); // Сохраняем userId как Integer
+                        session.setAttribute("userId", sqlOutput.getInt("id"));
+
                         response.getWriter().write("Login successful!");
 
                         response.sendRedirect("dashboard.jsp");
