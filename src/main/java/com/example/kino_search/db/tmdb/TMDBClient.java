@@ -3,13 +3,17 @@ package com.example.kino_search.db.tmdb;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.logging.Logger;
+
+import com.example.kino_search.property.PropertyManager;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 public class TMDBClient {
 
-    private static final String API_KEY = "e28fe83118014486bd75c60ecd32ede4";
-    private static final String BASE_URL = "https://api.themoviedb.org/3";
+    private static final Logger logger = Logger.getLogger(TMDBClient.class.getName());
+    private static final String API_KEY = PropertyManager.getProperty("tmdb.api_key");
+    private static final String BASE_URL = PropertyManager.getProperty("tmdb.base_url");
 
     public static JsonObject fetchPopularMovies() throws Exception {
         String urlStr = BASE_URL + "/movie/popular?api_key=" + API_KEY + "&language=en-US&page=1";

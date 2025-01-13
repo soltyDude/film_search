@@ -22,7 +22,6 @@ public class StartupListener implements ServletContextListener {
         scheduler = Executors.newSingleThreadScheduledExecutor();
         // Запускаем updateFilms() раз в сутки
         // Можно менять период на свое усмотрениt
-        //
         scheduler.scheduleAtFixedRate(() -> {
             TMDBUpdater.updateFilms();
         }, 0, 24, TimeUnit.HOURS);
