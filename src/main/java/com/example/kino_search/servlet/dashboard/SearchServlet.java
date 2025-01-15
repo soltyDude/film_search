@@ -54,7 +54,7 @@ public class SearchServlet extends HttpServlet {
                 apiID = Integer.parseInt(movie.get("id").getAsString());
 
                 //save or update
-                FilmService.fetchAndSaveFilm(Integer.parseInt(String.valueOf(apiID)));
+                FilmService.getInstance().fetchAndSaveFilm(Integer.parseInt(String.valueOf(apiID)));
 
                 Map<String, String> movieData = new HashMap<>();
                 movieData.put("id", String.valueOf(apiID)); // Убедитесь, что ID добавляетс

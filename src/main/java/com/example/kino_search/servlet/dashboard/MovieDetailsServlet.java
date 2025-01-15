@@ -42,25 +42,25 @@ public class MovieDetailsServlet extends HttpServlet {
 
         try {
             // Добавляем фильм в базу данных, если его ещё нет
-            FilmService.fetchAndSaveFilm(Integer.parseInt(movieAPIId));
+            FilmService.getInstance().fetchAndSaveFilm(Integer.parseInt(movieAPIId));
 
             // Получаем информацию о фильме из базы данных
-            int filmId = FilmService.getFilmIdByApiId(Integer.parseInt(movieAPIId));
+            int filmId = FilmService.getInstance().getFilmIdByApiId(Integer.parseInt(movieAPIId));
             if (filmId == -1) {
                 throw new Exception("Film not found in the database for API ID: " + movieAPIId);
             }
 
             // Получаем данные о фильме из базы данных
-            Map<String, Object> movieDetails = FilmService.getFilmDetailsById(filmId);
+            Map<String, Object> movieDetails = FilmService.getInstance().getFilmDetailsById(filmId);
 
             // Получаем ID плейлиста "Want to Watch" для текущего пользователя
-            int playlistId = PlaylistDAO.getWantToWatchPlaylistId(userId);
+            int playlistId = PlaylistDAO.getInstance().getWantToWatchPlaylistId(userId);
             if (playlistId == -1) {
                 throw new Exception("Want to Watch playlist not found for user ID: " + userId);
             }
 
             // Получаем список отзывов
-            List<Map<String, Object>> reviews = ReviewDAO.getReviewsByFilmId(filmId);
+            List<Map<String, Object>> reviews = ReviewDAO.getInstance().getReviewsByFilmId(filmId);
 
             // Передаем данные фильма на JSP
             request.setAttribute("title", movieDetails.get("title"));
@@ -77,7 +77,7 @@ public class MovieDetailsServlet extends HttpServlet {
             request.setAttribute("internalRating", movieDetails.get("rating") != null ? movieDetails.get("rating") : "N/A");
 
             // Получаем список плейлистов пользователя
-            List<Map<String, Object>> playlists = PlaylistDAO.getPlaylistsByUserId(userId);
+            List<Map<String, Object>> playlists = PlaylistDAO.getInstance().getPlaylistsByUserId(userId);
             request.setAttribute("playlists", playlists);
 
             System.out.println(movieDetails.get("api_rating").toString());

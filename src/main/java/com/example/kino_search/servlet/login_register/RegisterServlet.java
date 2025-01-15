@@ -38,7 +38,7 @@ public class RegisterServlet extends HttpServlet {
         // Hash the password
         String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
 
-        try (Connection conn = ConnectionManager.getConnection()) {
+        try (Connection conn = ConnectionManager.getInstance().getConnection()) {
             // Check if the email is already in use
             String checkEmailSql = "SELECT COUNT(*) FROM users WHERE email = ?";
             try (PreparedStatement checkStmt = conn.prepareStatement(checkEmailSql)) {

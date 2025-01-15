@@ -26,7 +26,7 @@ public class TableCreator {
             )
         """;
 
-        try (Connection connection = ConnectionManager.getConnection();
+        try (Connection connection = ConnectionManager.getInstance().getConnection();
              Statement statement = connection.createStatement()) {
 
             statement.execute(createTableSQL);
@@ -46,7 +46,7 @@ public class TableCreator {
              )
         """;
 
-        try (Connection connection = ConnectionManager.getConnection();
+        try (Connection connection = ConnectionManager.getInstance().getConnection();
              Statement statement = connection.createStatement()) {
 
             statement.execute(createTableSQL);
@@ -66,7 +66,7 @@ public class TableCreator {
               )
         """;
 
-        try (Connection connection = ConnectionManager.getConnection();
+        try (Connection connection = ConnectionManager.getInstance().getConnection();
              Statement statement = connection.createStatement()) {
 
             statement.execute(createTableSQL);
@@ -78,7 +78,7 @@ public class TableCreator {
     }
 
     public static void main(String[] args) {
-        FilmService.fetchAndSaveFilm(278);
+        FilmService.getInstance().fetchAndSaveFilm(278);
         //createFilmTable();
     }
 }

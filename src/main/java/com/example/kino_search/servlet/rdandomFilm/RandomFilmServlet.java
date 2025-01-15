@@ -13,7 +13,7 @@ public class RandomFilmServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, IOException, ServletException {
 
-        Map<String, Object> film = FilmDAO.getRandomFilm();
+        Map<String, Object> film = FilmDAO.getInstance().getRandomFilm();
         if (film == null || film.isEmpty()) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "No films found");
             return;

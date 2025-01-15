@@ -11,10 +11,32 @@ import java.util.logging.Logger;
 /**
  * Data Access Object (DAO) class for managing the relationship between genres and films.
  * This class provides functionality to save a genre-film association into the database.
+ * Implemented as a Singleton to ensure only one instance is used throughout the application.
  */
 public class GenreFilmDAO {
 
     private static final Logger logger = Logger.getLogger(GenreFilmDAO.class.getName());
+    private static volatile GenreFilmDAO instance;
+
+    // Private constructor to prevent instantiation
+    private GenreFilmDAO() {}
+
+    /**
+     * Returns the singleton instance of the GenreFilmDAO class.
+     * Uses double-checked locking for thread safety.
+     *
+     * @return The singleton instance of GenreFilmDAO.
+     */
+    public static GenreFilmDAO getInstance() {
+        if (instance == null) {
+            synchronized (GenreFilmDAO.class) {
+                if (instance == null) {
+                    instance = new GenreFilmDAO();
+                }
+            }
+        }
+        return instance;
+    }
 
     /**
      * Saves the relationship between a genre and a film into the database.
@@ -24,7 +46,7 @@ public class GenreFilmDAO {
      * @param filmId The ID of the film.
      * @return true if the relationship was successfully added, false if it already exists or an error occurred.
      */
-    public static boolean saveGenreFilm(int genreId, int filmId) {
+    public boolean saveGenreFilm(int genreId, int filmId) {
         // Validate input parameters
         if (genreId <= 0 || filmId <= 0) {
             logger.severe("Invalid genreId or filmId for saving genre-film relation: Genre ID = " + genreId + ", Film ID = " + filmId);
@@ -36,7 +58,7 @@ public class GenreFilmDAO {
         // SQL query to insert the genre-film relationship
         String sql = "INSERT INTO genre_film (genre_id, film_id) VALUES (?, ?) ON CONFLICT DO NOTHING";
 
-        try (Connection conn = ConnectionManager.getConnection();
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             // Set query parameters
@@ -70,7 +92,7 @@ public class GenreFilmDAO {
      * @param filmId The ID of the film.
      * @return true if the relationship was successfully removed, false otherwise.
      */
-//    public static boolean removeGenreFilm(int genreId, int filmId) {
+//    public boolean removeGenreFilm(int genreId, int filmId) {
 //        String sql = "DELETE FROM genre_film WHERE genre_id = ? AND film_id = ?";
 //
 //        try (Connection conn = ConnectionManager.getConnection();

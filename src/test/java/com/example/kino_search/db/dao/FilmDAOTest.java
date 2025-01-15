@@ -24,21 +24,21 @@ public class FilmDAOTest {
         film.setOverview("Test Overview");
 
         // Сохраняем фильм в базу
-        FilmDAO.saveOrUpdateFilm(film);
+        FilmDAO.getInstance().saveOrUpdateFilm(film);
 
         // Проверяем, что ID присвоен
         Assertions.assertNotNull(film.getId(), "Film ID should be assigned after saving.");
 
         // Теперь пробуем получить этот фильм по api_id
-        Film fetched = FilmDAO.getFilmByApiId(999999);
+        Film fetched = FilmDAO.getInstance().getFilmById(999999);
         Assertions.assertNotNull(fetched, "Fetched film should not be null.");
         Assertions.assertEquals("Test Movie", fetched.getTitle(), "Title should match the saved film.");
 
         // Можно обновить фильм
         film.setTitle("Updated Test Movie");
-        FilmDAO.saveOrUpdateFilm(film);
+        FilmDAO.getInstance().saveOrUpdateFilm(film);
 
-        Film updated = FilmDAO.getFilmByApiId(999999);
+        Film updated = FilmDAO.getInstance().getFilmById(999999);
         Assertions.assertEquals("Updated Test Movie", updated.getTitle(), "Title should be updated.");
 
         // После теста можно почистить базу, если хотите
@@ -48,7 +48,7 @@ public class FilmDAOTest {
     @Test
     public void testGetRandomFilm() {
         // Проверим, что метод getRandomFilm() возвращает что-то, при условии, что в БД есть фильмы
-        var filmData = FilmDAO.getRandomFilm();
+        var filmData = FilmDAO.getInstance().getRandomFilm();
         Assertions.assertFalse(filmData.isEmpty(), "Should return some random film data.");
         Assertions.assertTrue(filmData.containsKey("title"), "Random film should have a title.");
     }

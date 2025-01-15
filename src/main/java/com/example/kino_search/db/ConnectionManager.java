@@ -10,6 +10,27 @@ import java.util.logging.Logger;
 
 public class ConnectionManager {
     private static final Logger logger = Logger.getLogger(ConnectionManager.class.getName());
+    private static volatile ConnectionManager instance;
+
+    // Private constructor to prevent instantiation
+    private ConnectionManager() {}
+
+    /**
+     * Returns the singleton instance of the GenreFilmDAO class.
+     * Uses double-checked locking for thread safety.
+     *
+     * @return The singleton instance of GenreFilmDAO.
+     */
+    public static ConnectionManager getInstance() {
+        if (instance == null) {
+            synchronized (ConnectionManager.class) {
+                if (instance == null) {
+                    instance = new ConnectionManager();
+                }
+            }
+        }
+        return instance;
+    }
 
     static {
         try {
@@ -20,7 +41,7 @@ public class ConnectionManager {
         }
     }
 
-    public static Connection getConnection() throws SQLException {
+    public Connection getConnection() throws SQLException {
         // Load database connection properties
         String dbUrl = PropertyManager.getProperty("db.url");
         String dbUser = PropertyManager.getProperty("db.username");

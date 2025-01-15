@@ -17,11 +17,11 @@ public class TMDBUpdater {
     public static void updateFilms() {
         try {
             // Получаем популярные фильмы
-            JsonObject popularResponse = TMDBClient.fetchPopularMovies();
+            JsonObject popularResponse = TMDBClient.getInstance().fetchPopularMovies();
             updateFromJsonResponse(popularResponse);
 
             // Получаем топовые фильмы
-            JsonObject topRatedResponse = TMDBClient.fetchTopRatedMovies();
+            JsonObject topRatedResponse = TMDBClient.getInstance().fetchTopRatedMovies();
             updateFromJsonResponse(topRatedResponse);
 
             logger.info("TMDB update completed successfully.");
@@ -40,7 +40,7 @@ public class TMDBUpdater {
         for (JsonElement elem : results) {
             JsonObject filmJson = elem.getAsJsonObject();
             Film film = parseFilmFromJson(filmJson);
-            FilmDAO.saveOrUpdateFilm(film);
+            FilmDAO.getInstance().saveOrUpdateFilm(film);
         }
     }
 

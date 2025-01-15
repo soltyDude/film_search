@@ -13,16 +13,36 @@ import java.util.logging.Logger;
 public class ViewedMoviesDAO {
 
     private static final Logger logger = Logger.getLogger(ViewedMoviesDAO.class.getName());
+    private static volatile ViewedMoviesDAO instance;
 
+    // Private constructor to prevent instantiation
+    private ViewedMoviesDAO() {}
+
+    /**
+     * Returns the singleton instance of the GenreFilmDAO class.
+     * Uses double-checked locking for thread safety.
+     *
+     * @return The singleton instance of GenreFilmDAO.
+     */
+    public static ViewedMoviesDAO getInstance() {
+        if (instance == null) {
+            synchronized (ViewedMoviesDAO.class) {
+                if (instance == null) {
+                    instance = new ViewedMoviesDAO();
+                }
+            }
+        }
+        return instance;
+    }
     // Добавление фильма в просмотренные
-    public static boolean addMovieToViewed(int userId, int filmId, Integer reviewId) {
+    public boolean addMovieToViewed(int userId, int filmId, Integer reviewId) {
         String sql = """
             INSERT INTO viewed_movies (user_id, film_id, reviews_id) 
             VALUES (?, ?, ?) 
             ON CONFLICT (user_id, film_id) DO NOTHING
             """;
 
-        try (Connection conn = ConnectionManager.getConnection();
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, userId);
@@ -47,9 +67,9 @@ public class ViewedMoviesDAO {
     }
 
     // Удаление фильма из просмотренных
-    public static boolean removeMovieFromViewed(int userId, int filmId) {
+    public boolean removeMovieFromViewed(int userId, int filmId) {
         String sql = "DELETE FROM viewed_movies WHERE user_id = ? AND film_id = ?";
-        try (Connection conn = ConnectionManager.getConnection();
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, userId);
@@ -69,9 +89,9 @@ public class ViewedMoviesDAO {
     }
 
     // Проверка, существует ли фильм в просмотренных
-    public static boolean isMovieInViewed(int userId, int filmId) {
+    public boolean isMovieInViewed(int userId, int filmId) {
         String sql = "SELECT 1 FROM viewed_movies WHERE user_id = ? AND film_id = ?";
-        try (Connection conn = ConnectionManager.getConnection();
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, userId);
@@ -89,7 +109,7 @@ public class ViewedMoviesDAO {
     }
 
     // Получение списка просмотренных фильмов для пользователя
-    public static List<Map<String, Object>> getViewedMoviesByUserId(int userId) {
+    public List<Map<String, Object>> getViewedMoviesByUserId(int userId) {
         String sql = """
         SELECT v.viewed_at, f.api_id, f.title, f.poster_url, r.rating
         FROM viewed_movies v
@@ -101,7 +121,7 @@ public class ViewedMoviesDAO {
 
         List<Map<String, Object>> viewedMovies = new ArrayList<>();
 
-        try (Connection conn = ConnectionManager.getConnection();
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, userId);
@@ -133,14 +153,14 @@ public class ViewedMoviesDAO {
 
 
     // Обновление записи о просмотренном фильме (например, добавление review_id)
-    public static boolean updateViewedMovie(int userId, int filmId, Integer reviewId) {
+    public boolean updateViewedMovie(int userId, int filmId, Integer reviewId) {
         String sql = """
             UPDATE viewed_movies
             SET reviews_id = ?
             WHERE user_id = ? AND film_id = ?
         """;
 
-        try (Connection conn = ConnectionManager.getConnection();
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             if (reviewId != null) {

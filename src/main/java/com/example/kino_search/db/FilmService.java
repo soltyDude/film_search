@@ -3,6 +3,7 @@ package com.example.kino_search.db;
 import com.example.kino_search.db.dao.FilmDAO;
 import com.example.kino_search.db.dao.GenreDAO;
 import com.example.kino_search.db.dao.GenreFilmDAO;
+import com.example.kino_search.db.tmdb.TMDBClient;
 import com.example.kino_search.model.Film;
 import com.example.kino_search.util.TMDBApiUtil;
 import com.google.gson.JsonArray;
@@ -18,12 +19,34 @@ public class FilmService {
 
     private static final Logger logger = Logger.getLogger(FilmService.class.getName());
 
-    public static void fetchAndSaveFilm(int apiId) {
+    private static volatile FilmService instance;
+
+    // Private constructor to prevent instantiation
+    private FilmService() {}
+
+    /**
+     * Returns the singleton instance of the GenreFilmDAO class.
+     * Uses double-checked locking for thread safety.
+     *
+     * @return The singleton instance of GenreFilmDAO.
+     */
+    public static FilmService getInstance() {
+        if (instance == null) {
+            synchronized (FilmService.class) {
+                if (instance == null) {
+                    instance = new FilmService();
+                }
+            }
+        }
+        return instance;
+    }
+
+    public void fetchAndSaveFilm(int apiId) {
         logger.info("Starting process to fetch and save film with API ID: " + apiId);
 
         try {
             // Проверяем, существует ли фильм в базе
-            Film existingFilm = FilmDAO.getFilmByApiId(apiId);
+            Film existingFilm = FilmDAO.getInstance().getFilmByApiId(apiId);
 
             if (existingFilm != null) {
                 logger.info("Film already exists in database: " + existingFilm.getTitle());
@@ -54,7 +77,7 @@ public class FilmService {
 
             // Сохраняем фильм
             logger.info("Saving film to database: " + film.getTitle());
-            FilmDAO.saveOrUpdateFilm(film);
+            FilmDAO.getInstance().saveOrUpdateFilm(film);
 
             if (film.getId() == 0) {
                 logger.severe("Film ID is not set. Film might not have been saved properly.");
@@ -67,10 +90,10 @@ public class FilmService {
             for (int i = 0; i < genres.size(); i++) {
                 JsonObject genreObj = genres.get(i).getAsJsonObject();
                 String genreName = genreObj.get("name").getAsString();
-                int genreId = GenreDAO.saveOrGetGenreId(genreName);
+                int genreId = GenreDAO.getInstance().saveOrGetGenreId(genreName);
 
                 logger.info("Saving genre-film relation: Genre ID = " + genreId + ", Film ID = " + film.getId());
-                GenreFilmDAO.saveGenreFilm(genreId, film.getId());
+                GenreFilmDAO.getInstance().saveGenreFilm(genreId, film.getId());
             }
 
             logger.info("Film and genres saved successfully: " + film.getTitle());
@@ -80,10 +103,10 @@ public class FilmService {
     }
 
 
-    public static String getFilmTitleByID(int id) {
+    public String getFilmTitleByID(int id) {
 
         String sql = "SELECT title FROM film WHERE id = ?";
-        try (Connection conn = ConnectionManager.getConnection();
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, id);
@@ -104,9 +127,9 @@ public class FilmService {
     }
 
 
-    public static Integer getFilmIdByApiId(int apiId) {
+    public Integer getFilmIdByApiId(int apiId) {
         String sql = "SELECT id FROM film WHERE api_id = ?";
-        try (Connection conn = ConnectionManager.getConnection();
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, apiId);
@@ -127,11 +150,11 @@ public class FilmService {
     }
 
 
-    public static Map<String, Object> getFilmDetailsById(int filmId) {
+    public Map<String, Object> getFilmDetailsById(int filmId) {
         String sql = "SELECT title, overview, release_date, poster_url, api_rating, rating FROM film WHERE id = ?";
         Map<String, Object> movieDetails = new HashMap<>();
 
-        try (Connection conn = ConnectionManager.getConnection();
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, filmId);
@@ -152,7 +175,7 @@ public class FilmService {
         return movieDetails;
     }
 
-    public static boolean updateFilmRatingAndCount(int filmId, int newRating, boolean isUpdate) {
+    public boolean updateFilmRatingAndCount(int filmId, int newRating, boolean isUpdate) {
         String updateQuery;
         if (isUpdate) {
             updateQuery = """
@@ -171,7 +194,7 @@ public class FilmService {
 
         logger.info("Updating film: filmId=" + filmId + ", newRating=" + newRating + ", isUpdate=" + isUpdate);
 
-        try (Connection conn = ConnectionManager.getConnection();
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(updateQuery)) {
 
             stmt.setInt(1, newRating);
@@ -193,12 +216,12 @@ public class FilmService {
         return false;
     }
 
-    public static void testUpdateFilmRatingAndCount() {
+    public void testUpdateFilmRatingAndCount() {
         int testFilmId = 1; // Замените на существующий ID фильма
         int newRating = 8;
         boolean isUpdate = false; // Используйте true для обновления рейтинга
 
-        boolean result = updateFilmRatingAndCount(testFilmId, newRating, isUpdate);
+        boolean result = getInstance().updateFilmRatingAndCount(testFilmId, newRating, isUpdate);
 
         if (result) {
             logger.info("Test passed: Film rating and count updated successfully.");
@@ -207,11 +230,11 @@ public class FilmService {
         }
     }
 
-    public static boolean updateFilmRatingAndCount(int filmId) {
+    public boolean updateFilmRatingAndCount(int filmId) {
         String avgSql = "SELECT AVG(rating) as avg_rating, COUNT(*) as cnt FROM reviews WHERE film_id = ?";
         String updateFilmSql = "UPDATE film SET rating = ?, count = ? WHERE id = ?";
 
-        try (Connection conn = ConnectionManager.getConnection();
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
              PreparedStatement avgStmt = conn.prepareStatement(avgSql);
              PreparedStatement updateStmt = conn.prepareStatement(updateFilmSql)) {
 

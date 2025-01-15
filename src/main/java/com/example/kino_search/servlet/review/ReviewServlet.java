@@ -27,28 +27,28 @@ public class ReviewServlet extends HttpServlet {
 
             logger.info("Received review: userId=" + userId + ", filmAPIId=" + filmAPIId + ", rating=" + rating);
 
-            int filmId = FilmService.getFilmIdByApiId(filmAPIId);
+            int filmId = FilmService.getInstance().getFilmIdByApiId(filmAPIId);
 
             // Проверяем, существует ли фильм в просмотренных, если нет - добавляем
-            if (!ViewedMoviesDAO.isMovieInViewed(userId, filmId)) {
-                boolean addedToViewed = ViewedMoviesDAO.addMovieToViewed(userId, filmId, null);
+            if (!ViewedMoviesDAO.getInstance().isMovieInViewed(userId, filmId)) {
+                boolean addedToViewed = ViewedMoviesDAO.getInstance().addMovieToViewed(userId, filmId, null);
                 logger.info("Added film to viewed list: " + addedToViewed);
             }
 
-            boolean reviewExists = ReviewDAO.isReviewExists(userId, filmId);
+            boolean reviewExists = ReviewDAO.getInstance().isReviewExists(userId, filmId);
 
             boolean success;
             if (reviewExists) {
-                success = ReviewDAO.updateReview(userId, filmId, rating, reviewText);
+                success = ReviewDAO.getInstance().updateReview(userId, filmId, rating, reviewText);
                 logger.info("Review updated: " + success);
             } else {
-                success = ReviewDAO.addReview(userId, filmAPIId, rating, reviewText);
+                success = ReviewDAO.getInstance().addReview(userId, filmAPIId, rating, reviewText);
                 logger.info("Review added: " + success);
             }
 
             if (success) {
                 // После успешного добавления/обновления отзыва пересчитываем рейтинг фильма
-                boolean updatedRating = FilmService.updateFilmRatingAndCount(filmId);
+                boolean updatedRating = FilmService.getInstance().updateFilmRatingAndCount(filmId);
                 logger.info("Updated film rating and count: " + updatedRating);
 
                 response.sendRedirect("movie?id=" + filmAPIId);

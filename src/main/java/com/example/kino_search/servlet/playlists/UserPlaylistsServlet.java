@@ -30,7 +30,7 @@ public class UserPlaylistsServlet extends HttpServlet {
 
         try {
             // Получаем плейлисты пользователя из базы данных
-            List<Map<String, Object>> playlists = PlaylistDAO.getPlaylistsByUserId(userId);
+            List<Map<String, Object>> playlists = PlaylistDAO.getInstance().getPlaylistsByUserId(userId);
             logger.info("Found " + playlists.size() + " playlists");
 
             // Передаем данные в JSP

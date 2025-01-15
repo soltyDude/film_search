@@ -24,7 +24,7 @@ public class RecommendationServlet extends HttpServlet {
             }
 
             // Fetch recommendation list through UserDAO
-            List<Map<String, String>> recommendations = UserDAO.getRecommendedMovies(userId);
+            List<Map<String, String>> recommendations = UserDAO.getInstance().getRecommendedMovies(userId);
 
             // Pass the data to JSP
             request.setAttribute("recommendations", recommendations);

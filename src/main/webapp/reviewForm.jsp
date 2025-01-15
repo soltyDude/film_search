@@ -20,8 +20,8 @@
         return;
     }
 
-    int filmId = FilmService.getFilmIdByApiId(apiId);
-    Map<String, Object> existingReview = ReviewDAO.getReviewByUserAndFilm(userId, filmId);
+    int filmId = FilmService.getInstance().getFilmIdByApiId(apiId);
+    Map<String, Object> existingReview = ReviewDAO.getInstance().getReviewByUserAndFilm(userId, filmId);
 
     Integer existingRating = null;
     String existingReviewText = "";

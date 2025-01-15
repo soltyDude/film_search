@@ -27,7 +27,7 @@ public class CreatePlaylistServlet extends HttpServlet {
             return;
         }
 
-        boolean isCreated = PlaylistDAO.createPlaylist(userId, playlistName);
+        boolean isCreated = PlaylistDAO.getInstance().createPlaylist(userId, playlistName);
 
         if (isCreated) {
             response.sendRedirect("playlists"); // Перенаправление на страницу с плейлистами

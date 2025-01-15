@@ -18,17 +18,37 @@ import java.util.logging.Logger;
 public class UserDAO {
 
     private static final Logger logger = Logger.getLogger(UserDAO.class.getName());
+    private static volatile UserDAO instance;
 
+    // Private constructor to prevent instantiation
+    private UserDAO() {}
+
+    /**
+     * Returns the singleton instance of the GenreFilmDAO class.
+     * Uses double-checked locking for thread safety.
+     *
+     * @return The singleton instance of GenreFilmDAO.
+     */
+    public static UserDAO getInstance() {
+        if (instance == null) {
+            synchronized (UserDAO.class) {
+                if (instance == null) {
+                    instance = new UserDAO();
+                }
+            }
+        }
+        return instance;
+    }
     /**
      * Retrieves the user's nickname by their ID.
      *
      * @param userId User ID.
      * @return The user's nickname or null if not found.
      */
-    public static String getUserNicknameById(int userId) {
+    public String getUserNicknameById(int userId) {
         logger.log(Level.INFO, "Fetching nickname for userId: {0}", userId);
         String query = "SELECT nickname FROM users WHERE id = ?";
-        try (Connection connection = ConnectionManager.getConnection();
+        try (Connection connection = ConnectionManager.getInstance().getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
             preparedStatement.setInt(1, userId);
@@ -55,7 +75,7 @@ public class UserDAO {
      * @param userId User ID.
      * @return A list of Object[] where each array contains [title, api_id, rating, viewed_at].
      */
-    public static List<Object[]> getRecommendedBaseMovies(int userId) {
+    public List<Object[]> getRecommendedBaseMovies(int userId) {
         logger.log(Level.INFO, "Fetching recommended base movies for userId: {0}", userId);
 
         String query = """
@@ -70,7 +90,7 @@ public class UserDAO {
 
         List<Object[]> movies = new ArrayList<>();
 
-        try (Connection connection = ConnectionManager.getConnection();
+        try (Connection connection = ConnectionManager.getInstance().getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
             preparedStatement.setInt(1, userId);
@@ -102,12 +122,12 @@ public class UserDAO {
      * - Fetch similar movies using TMDB's /movie/{api_id}/similar endpoint.
      * - Add unique results to the final recommendation list.
      */
-    public static List<Map<String, String>> getRecommendedMovies(int userId) {
+    public List<Map<String, String>> getRecommendedMovies(int userId) {
         logger.log(Level.INFO, "Calculating recommended movies for userId: {0}", userId);
         List<Map<String, String>> recommendedMovies = new ArrayList<>();
 
         // Get the base list of user-rated movies (with api_id)
-        List<Object[]> baseMovies = UserDAO.getRecommendedBaseMovies(userId);
+        List<Object[]> baseMovies = UserDAO.getInstance().getRecommendedBaseMovies(userId);
 
         for (Object[] baseMovie : baseMovies) {
             String title = (String) baseMovie[0];
@@ -115,7 +135,7 @@ public class UserDAO {
             int rating = (int) baseMovie[2];
             String viewedAtStr = (String) baseMovie[3];
 
-            int weight = calculateWeight(viewedAtStr);
+            int weight = getInstance().calculateWeight(viewedAtStr);
             int similarCount = (rating + weight) * 3;
             similarCount = Math.max(similarCount, 5);
 
@@ -123,11 +143,11 @@ public class UserDAO {
                     new Object[]{title, apiId, rating, viewedAtStr, weight, similarCount});
 
             // Fetch similar movies from TMDB using movie id
-            List<Map<String, String>> similarMovies = fetchSimilarMoviesFromTMDB(apiId, similarCount);
+            List<Map<String, String>> similarMovies = getInstance().fetchSimilarMoviesFromTMDB(apiId, similarCount);
 
             // Add unique movies
             for (Map<String, String> movie : similarMovies) {
-                if (!isMovieInList(recommendedMovies, movie)) {
+                if (!getInstance().isMovieInList(recommendedMovies, movie)) {
                     recommendedMovies.add(movie);
                 }
             }
@@ -146,7 +166,7 @@ public class UserDAO {
      * 12–17 months: +1
      * 18+ months: +0
      */
-    public static int calculateWeight(String viewedAtStr) {
+    public int calculateWeight(String viewedAtStr) {
         LocalDate viewedAt = LocalDate.parse(viewedAtStr.substring(0, 10));
         LocalDate now = LocalDate.now();
         long monthsSinceViewed = ChronoUnit.MONTHS.between(viewedAt, now);
@@ -172,7 +192,7 @@ public class UserDAO {
      * Fetches similar movies from TMDB using /movie/{apiId}/similar endpoint.
      * 'count' determines how many results to take from the fetched list.
      */
-    public static List<Map<String, String>> fetchSimilarMoviesFromTMDB(int apiId, int count) {
+    public List<Map<String, String>> fetchSimilarMoviesFromTMDB(int apiId, int count) {
         logger.log(Level.INFO, "Fetching similar movies for apiId={0}, requested count={1}", new Object[]{apiId, count});
         List<Map<String, String>> similarMovies = new ArrayList<>();
 
@@ -207,7 +227,7 @@ public class UserDAO {
     /**
      * Checks if a movie is already in the list.
      */
-    private static boolean isMovieInList(List<Map<String, String>> movieList, Map<String, String> movie) {
+    private boolean isMovieInList(List<Map<String, String>> movieList, Map<String, String> movie) {
         String movieId = movie.get("id");
         for (Map<String, String> existingMovie : movieList) {
             if (existingMovie.get("id").equals(movieId)) {

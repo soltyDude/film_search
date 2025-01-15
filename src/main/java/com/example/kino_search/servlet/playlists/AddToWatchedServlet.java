@@ -32,16 +32,16 @@ public class AddToWatchedServlet extends HttpServlet {
             int parsedUserId = Integer.parseInt(userId);
 
             // Get the film ID from the database
-            int filmId = FilmService.getFilmIdByApiId(parsedApiId);
+            int filmId = FilmService.getInstance().getFilmIdByApiId(parsedApiId);
 
             // Add a placeholder review (rating and review_text can be updated later)
             //int reviewId = ReviewDAO.addPlaceholderReview(parsedUserId, filmId);
 
             // Add the movie to "viewed_movies"
-            boolean addedToWatched = ViewedMoviesDAO.addMovieToViewed(parsedUserId, filmId, null);
+            boolean addedToWatched = ViewedMoviesDAO.getInstance().addMovieToViewed(parsedUserId, filmId, null);
 
             if (addedToWatched) {
-                String filmTitle = FilmService.getFilmTitleByID(filmId); // Получить название фильма
+                String filmTitle = FilmService.getInstance().getFilmTitleByID(filmId); // Получить название фильма
                 String playlistName = "Watched"; // Название плейлиста или логика его получения
 
                 request.setAttribute("filmTitle", filmTitle);

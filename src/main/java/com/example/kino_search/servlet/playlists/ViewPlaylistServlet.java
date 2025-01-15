@@ -28,7 +28,7 @@ public class ViewPlaylistServlet extends HttpServlet {
             int playlistId = Integer.parseInt(playlistIdParam);
 
             // Получаем детали плейлиста и фильмы
-            Map<String, Object> playlistDetails = PlaylistDAO.getPlaylistDetails(playlistId);
+            Map<String, Object> playlistDetails = PlaylistDAO.getInstance().getPlaylistDetails(playlistId);
 
             if (playlistDetails == null || playlistDetails.isEmpty()) {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND, "Playlist not found.");

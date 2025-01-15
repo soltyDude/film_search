@@ -17,7 +17,28 @@ import java.util.logging.Logger;
 public class ReviewDAO {
 
     private static final Logger logger = Logger.getLogger(ReviewDAO.class.getName());
-    public static boolean addReview(int userId, int filmAPIId, int rating, String reviewText) {
+    private static volatile ReviewDAO instance;
+
+    // Private constructor to prevent instantiation
+    private ReviewDAO() {}
+
+    /**
+     * Returns the singleton instance of the GenreFilmDAO class.
+     * Uses double-checked locking for thread safety.
+     *
+     * @return The singleton instance of GenreFilmDAO.
+     */
+    public static ReviewDAO getInstance() {
+        if (instance == null) {
+            synchronized (ReviewDAO.class) {
+                if (instance == null) {
+                    instance = new ReviewDAO();
+                }
+            }
+        }
+        return instance;
+    }
+    public boolean addReview(int userId, int filmAPIId, int rating, String reviewText) {
         String reviewSql = """
         INSERT INTO reviews (user_id, film_id, rating, review_text) 
         VALUES (?, ?, ?, ?)
@@ -30,11 +51,11 @@ public class ReviewDAO {
         WHERE user_id = ? AND film_id = ?
     """;
 
-        try (Connection conn = ConnectionManager.getConnection();
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
              PreparedStatement reviewStmt = conn.prepareStatement(reviewSql);
              PreparedStatement updateViewedMovieStmt = conn.prepareStatement(updateViewedMovieSql)) {
 
-            int filmId = FilmService.getFilmIdByApiId(filmAPIId);
+            int filmId = FilmService.getInstance().getFilmIdByApiId(filmAPIId);
 
             // Добавляем отзыв
             reviewStmt.setInt(1, userId);
@@ -73,13 +94,13 @@ public class ReviewDAO {
 
 
 
-    public static boolean isReviewExists(int userId, int filmId) {
+    public boolean isReviewExists(int userId, int filmId) {
         String sql = """
         SELECT 1 
         FROM reviews 
         WHERE user_id = ? AND film_id = ?
     """;
-        try (Connection conn = ConnectionManager.getConnection();
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, userId);
             stmt.setInt(2, filmId);
@@ -94,13 +115,13 @@ public class ReviewDAO {
     }
 
 
-    public static List<Map<String, Object>> getReviewsByFilmId(int filmId) {
+    public List<Map<String, Object>> getReviewsByFilmId(int filmId) {
         String sql = """
         SELECT user_id, rating, review_text, created_at 
         FROM reviews WHERE film_id = ?
     """;
         List<Map<String, Object>> reviews = new ArrayList<>();
-        try (Connection conn = ConnectionManager.getConnection();
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
 
@@ -112,7 +133,7 @@ public class ReviewDAO {
                 while (rs.next()) {
                     Map<String, Object> review = new HashMap<>();
                     int userId = rs.getInt("user_id");
-                    String nickname = UserDAO.getUserNicknameById(userId);
+                    String nickname = UserDAO.getInstance().getUserNicknameById(userId);
 
                     review.put("user_id", userId);
                     review.put("user_nickname", nickname);
@@ -128,9 +149,9 @@ public class ReviewDAO {
         return reviews;
     }
 
-    public static Map<String, Object> getReviewByUserAndFilm(int userId, int filmId) {
+    public Map<String, Object> getReviewByUserAndFilm(int userId, int filmId) {
         String sql = "SELECT rating, review_text FROM reviews WHERE user_id = ? AND film_id = ?";
-        try (Connection conn = ConnectionManager.getConnection();
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, userId);
             stmt.setInt(2, filmId);
@@ -149,7 +170,7 @@ public class ReviewDAO {
         return null;
     }
 
-    public static boolean updateReview(int userId, int filmId, int newRating, String newReviewText) {
+    public boolean updateReview(int userId, int filmId, int newRating, String newReviewText) {
         // Обновляем отзыв
         String updateReviewSql = """
         UPDATE reviews
@@ -167,7 +188,7 @@ public class ReviewDAO {
         WHERE id = ?
     """;
 
-        try (Connection conn = ConnectionManager.getConnection();
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
              PreparedStatement updateReviewStmt = conn.prepareStatement(updateReviewSql);
              PreparedStatement avgStmt = conn.prepareStatement(avgSql);
              PreparedStatement updateFilmStmt = conn.prepareStatement(updateFilmSql)) {

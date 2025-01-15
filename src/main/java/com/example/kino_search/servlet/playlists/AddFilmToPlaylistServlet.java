@@ -37,21 +37,21 @@ public class AddFilmToPlaylistServlet extends HttpServlet {
             int apiId = Integer.parseInt(apiIdParam);
 
             // Проверяем и сохраняем фильм в базе данных, если его там ещё нет
-            FilmService.fetchAndSaveFilm(apiId);
+            FilmService.getInstance().fetchAndSaveFilm(apiId);
 
             // Получаем ID фильма из базы данных
-            int filmId = FilmService.getFilmIdByApiId(apiId);
+            int filmId = FilmService.getInstance().getFilmIdByApiId(apiId);
             if (filmId == -1) {
                 throw new Exception("Film not found in the database for API ID: " + apiId);
             }
 
             // Добавляем фильм в плейлист
-            boolean isAdded = PlaylistFilmDAO.addFilmToPlaylist(playlistId, filmId);
+            boolean isAdded = PlaylistFilmDAO.getInstance().addFilmToPlaylist(playlistId, filmId);
 
             if (isAdded) {
                 // Получаем названия плейлиста и фильма
-                String playlistName = PlaylistDAO.getPlaylistNameById(playlistId);
-                String filmTitle = FilmService.getFilmTitleByID(filmId);
+                String playlistName = PlaylistDAO.getInstance().getPlaylistNameById(playlistId);
+                String filmTitle = FilmService.getInstance().getFilmTitleByID(filmId);
 
                 request.setAttribute("playlistName", playlistName);
                 request.setAttribute("filmTitle", filmTitle);
@@ -72,7 +72,7 @@ public class AddFilmToPlaylistServlet extends HttpServlet {
 
 private int getFilmIdByApiId(int apiId) {
         String sql = "SELECT id FROM film WHERE api_id = ?";
-        try (Connection conn = ConnectionManager.getConnection();
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, apiId);
             try (ResultSet rs = stmt.executeQuery()) {

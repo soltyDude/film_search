@@ -29,7 +29,7 @@ public class ViewedMoviesServlet extends HttpServlet {
 
         try {
             // Получаем список просмотренных фильмов из базы данных
-            List<Map<String, Object>> viewedMovies = ViewedMoviesDAO.getViewedMoviesByUserId(userId);
+            List<Map<String, Object>> viewedMovies = ViewedMoviesDAO.getInstance().getViewedMoviesByUserId(userId);
 
             // Передаем данные в JSP
             request.setAttribute("viewedMovies", viewedMovies);

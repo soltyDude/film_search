@@ -22,11 +22,11 @@ public class RemoveFilmFromPlaylistServlet extends HttpServlet {
         try {
             int playlistId = Integer.parseInt(request.getParameter("playlistId"));
             int apiId = Integer.parseInt(request.getParameter("apiId"));
-            int filmId = FilmService.getFilmIdByApiId(apiId);
+            int filmId = FilmService.getInstance().getFilmIdByApiId(apiId);
 // Затем удалить filmId из плейлиста
 
             // Удаляем фильм из плейлиста
-            boolean success = PlaylistFilmDAO.removeFilmFromPlaylist(playlistId, filmId);
+            boolean success = PlaylistFilmDAO.getInstance().removeFilmFromPlaylist(playlistId, filmId);
 
             if (success) {
                 logger.info("Film removed successfully from playlist. Playlist ID: " + playlistId + ", Film ID: " + filmId);

@@ -13,11 +13,22 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class FilmDAO {
+    private static volatile FilmDAO instance;
 
     private static final Logger logger = Logger.getLogger(FilmDAO.class.getName());
 
+    public static FilmDAO getInstance() {
+        if (instance == null) {
+            synchronized (FilmDAO.class) {
+                if (instance == null) {
+                    instance = new FilmDAO();
+                }
+            }
+        }
+        return instance;
+    }
     // Метод для сохранения фильма в таблицу потом убуду использовать для ежедненого обновления
-    public static void saveOrUpdateFilm(Film film) {
+    public void saveOrUpdateFilm(Film film) {
         String sqlInsert = """
         INSERT INTO film (api_id, title, release_date, poster_url, runtime, api_rating, rating, api_count, count, overview)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -35,7 +46,7 @@ public class FilmDAO {
 
         String sqlSelect = "SELECT id FROM film WHERE api_id = ?";
 
-        try (Connection conn = ConnectionManager.getConnection()) {
+        try (Connection conn = ConnectionManager.getInstance().getConnection()) {
             // Вставка или обновление
             try (PreparedStatement stmt = conn.prepareStatement(sqlInsert)) {
                 stmt.setInt(1, film.getApiId());
@@ -70,9 +81,9 @@ public class FilmDAO {
     }
 
 
-    public static Film getFilmByApiId(int apiId) {
+    public Film getFilmByApiId(int apiId) {
         String sql = "SELECT * FROM film WHERE api_id = ?";
-        try (Connection conn = ConnectionManager.getConnection();
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, apiId);
             ResultSet rs = stmt.executeQuery();
@@ -99,9 +110,9 @@ public class FilmDAO {
     }
 
 
-    public static Film getFilmById(int id) {
+    public Film getFilmById(int id) {
         String sql = "SELECT * FROM film WHERE id = ?";
-        try (Connection conn = ConnectionManager.getConnection();
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, id);
             ResultSet rs = stmt.executeQuery();
@@ -127,11 +138,11 @@ public class FilmDAO {
         return null; // Return null if no film is found or in case of an exception
     }
 
-    public static Map<String, Object> getRandomFilm() {
+    public Map<String, Object> getRandomFilm() {
         Map<String, Object> filmData = new HashMap<>();
         String sql = "SELECT id, title, poster_url, api_id FROM film ORDER BY RANDOM() LIMIT 1";
 
-        try (Connection conn = ConnectionManager.getConnection();
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
 

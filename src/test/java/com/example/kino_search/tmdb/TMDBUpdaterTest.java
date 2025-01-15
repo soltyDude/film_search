@@ -19,7 +19,7 @@ public class TMDBUpdaterTest {
 
         // 2. Проверяем, что в базе должны появиться какие-то фильмы.
         // Здесь мы можем просто вызвать FilmDAO.getRandomFilm() и убедиться что не пусто.
-        Map<String,Object> randomFilm = FilmDAO.getRandomFilm();
+        Map<String,Object> randomFilm = FilmDAO.getInstance().getRandomFilm();
 
         Assertions.assertFalse(randomFilm.isEmpty(), "After update, we should have at least one film in the database.");
     }

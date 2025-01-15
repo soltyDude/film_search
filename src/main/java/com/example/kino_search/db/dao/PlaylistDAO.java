@@ -15,12 +15,33 @@ import java.util.logging.Logger;
 public class PlaylistDAO {
 
     private static final Logger logger = Logger.getLogger(PlaylistDAO.class.getName());
+    private static volatile PlaylistDAO instance;
 
-    public static List<Map<String, Object>> getPlaylistsByUserId(int userId) {
+    // Private constructor to prevent instantiation
+    private PlaylistDAO() {}
+
+    /**
+     * Returns the singleton instance of the GenreFilmDAO class.
+     * Uses double-checked locking for thread safety.
+     *
+     * @return The singleton instance of GenreFilmDAO.
+     */
+    public static PlaylistDAO getInstance() {
+        if (instance == null) {
+            synchronized (PlaylistDAO.class) {
+                if (instance == null) {
+                    instance = new PlaylistDAO();
+                }
+            }
+        }
+        return instance;
+    }
+
+    public List<Map<String, Object>> getPlaylistsByUserId(int userId) {
         String sql = "SELECT id, name, created_at, updated_at FROM playlist WHERE user_id = ?";
         List<Map<String, Object>> playlists = new ArrayList<>();
 
-        try (Connection conn = ConnectionManager.getConnection();
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, userId);
@@ -48,10 +69,10 @@ public class PlaylistDAO {
      * @param userId ID пользователя
      * @return ID плейлиста или -1, если плейлист не найден
      */
-    public static int getWantToWatchPlaylistId(int userId) {
+    public int getWantToWatchPlaylistId(int userId) {
         String sql = "SELECT id FROM playlist WHERE user_id = ? AND name = 'Want to Watch'";
 
-        try (Connection conn = ConnectionManager.getConnection();
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, userId);
@@ -71,7 +92,7 @@ public class PlaylistDAO {
         return -1; // Плейлист не найден
     }
 
-    public static Map<String, Object> getPlaylistDetails(int playlistId) {
+    public Map<String, Object> getPlaylistDetails(int playlistId) {
         String sql = """
         SELECT p.id AS playlist_id, p.name AS playlist_name, p.created_at, p.updated_at,
                f.api_id AS film_api_id, f.title AS film_title, f.poster_url
@@ -83,7 +104,7 @@ public class PlaylistDAO {
         Map<String, Object> playlistDetails = new HashMap<>();
         List<Map<String, Object>> films = new ArrayList<>();
 
-        try (Connection conn = ConnectionManager.getConnection();
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, playlistId);
@@ -115,13 +136,13 @@ public class PlaylistDAO {
         return playlistDetails;
     }
 
-    public static boolean createPlaylist(int userId, String playlistName) {
+    public boolean createPlaylist(int userId, String playlistName) {
         String query = """
         INSERT INTO playlist (name, user_id, created_at, updated_at)
         VALUES (?, ?, NOW(), NOW())
     """;
 
-        try (Connection connection = ConnectionManager.getConnection();
+        try (Connection connection = ConnectionManager.getInstance().getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
             preparedStatement.setString(1, playlistName);
@@ -134,11 +155,11 @@ public class PlaylistDAO {
         }
     }
 
-    public static String getPlaylistNameById(int playlistId) {
+    public String getPlaylistNameById(int playlistId) {
         String sql = """
         SELECT name FROM playlist WHERE id = ?""";
 
-        try (Connection conn = ConnectionManager.getConnection();
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, playlistId);

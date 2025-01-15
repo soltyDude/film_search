@@ -12,10 +12,32 @@ import java.util.logging.Logger;
 /**
  * Data Access Object (DAO) class for managing genres in the database.
  * This class provides functionality to save a genre or retrieve its ID by name.
+ * Implemented as a Singleton to ensure only one instance is used throughout the application.
  */
 public class GenreDAO {
 
     private static final Logger logger = Logger.getLogger(GenreDAO.class.getName());
+    private static volatile GenreDAO instance;
+
+    // Private constructor to prevent instantiation
+    private GenreDAO() {}
+
+    /**
+     * Returns the singleton instance of the GenreDAO class.
+     * Uses double-checked locking for thread safety.
+     *
+     * @return The singleton instance of GenreDAO.
+     */
+    public static GenreDAO getInstance() {
+        if (instance == null) {
+            synchronized (GenreDAO.class) {
+                if (instance == null) {
+                    instance = new GenreDAO();
+                }
+            }
+        }
+        return instance;
+    }
 
     /**
      * Saves a genre to the database or retrieves its ID if it already exists.
@@ -24,14 +46,14 @@ public class GenreDAO {
      * @param genreName The name of the genre to save or retrieve.
      * @return The ID of the genre if successfully found or inserted, otherwise -1.
      */
-    public static int saveOrGetGenreId(String genreName) {
+    public int saveOrGetGenreId(String genreName) {
         // SQL query to insert a genre (ignoring duplicates)
         String sqlInsert = "INSERT INTO genre (name) VALUES (?) ON CONFLICT (name) DO NOTHING";
 
         // SQL query to retrieve the genre ID by name
         String sqlSelect = "SELECT id FROM genre WHERE name = ?";
 
-        try (Connection conn = ConnectionManager.getConnection()) {
+        try (Connection conn = ConnectionManager.getInstance().getConnection()) {
             // Insert the genre into the database if it doesn't already exist
             try (PreparedStatement insertStmt = conn.prepareStatement(sqlInsert)) {
                 insertStmt.setString(1, genreName);
@@ -61,5 +83,4 @@ public class GenreDAO {
 
         return -1; // Return -1 if an error occurred
     }
-
 }

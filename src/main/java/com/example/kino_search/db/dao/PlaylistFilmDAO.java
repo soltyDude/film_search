@@ -12,11 +12,31 @@ import java.util.logging.Logger;
 public class PlaylistFilmDAO {
 
     private static final Logger logger = Logger.getLogger(PlaylistFilmDAO.class.getName());
+    private static volatile PlaylistFilmDAO instance;
 
+    // Private constructor to prevent instantiation
+    private PlaylistFilmDAO() {}
+
+    /**
+     * Returns the singleton instance of the GenreFilmDAO class.
+     * Uses double-checked locking for thread safety.
+     *
+     * @return The singleton instance of GenreFilmDAO.
+     */
+    public static PlaylistFilmDAO getInstance() {
+        if (instance == null) {
+            synchronized (PlaylistFilmDAO.class) {
+                if (instance == null) {
+                    instance = new PlaylistFilmDAO();
+                }
+            }
+        }
+        return instance;
+    }
     // Добавление фильма в плейлист
-    public static boolean addFilmToPlaylist(int playlistId, int filmID) {
+    public boolean addFilmToPlaylist(int playlistId, int filmID) {
         // Сначала сохраняем или получаем фильм из базы
-        FilmService.fetchAndSaveFilm(filmID);
+        FilmService.getInstance().fetchAndSaveFilm(filmID);
 
         String sql = """
             INSERT INTO playlist_film (playlist_id, film_id)
@@ -24,7 +44,7 @@ public class PlaylistFilmDAO {
             ON CONFLICT DO NOTHING
         """;
 
-        try (Connection conn = ConnectionManager.getConnection();
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, playlistId);
             stmt.setInt(2, filmID);
@@ -42,10 +62,10 @@ public class PlaylistFilmDAO {
     }
 
     // Удаление фильма из плейлиста
-    public static boolean removeFilmFromPlaylist(int playlistId, int filmId) {
+    public boolean removeFilmFromPlaylist(int playlistId, int filmId) {
         String sql = "DELETE FROM playlist_film WHERE playlist_id = ? AND film_id = ?";
 
-        try (Connection conn = ConnectionManager.getConnection();
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, playlistId);
             stmt.setInt(2, filmId);

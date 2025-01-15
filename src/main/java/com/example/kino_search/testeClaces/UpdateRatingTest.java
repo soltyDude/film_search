@@ -22,7 +22,7 @@ public class UpdateRatingTest {
 
         // Тестируем обновление рейтинга и количества
         boolean isUpdate = false; // Установите true для проверки обновления
-        boolean result = FilmService.updateFilmRatingAndCount(testFilmId, newRating, isUpdate);
+        boolean result = FilmService.getInstance().updateFilmRatingAndCount(testFilmId, newRating, isUpdate);
 
         if (result) {
             logger.info("Test passed: Film rating and count updated successfully.");
@@ -38,7 +38,7 @@ public class UpdateRatingTest {
     private static void printFilmDetails(int filmId) {
         String query = "SELECT id, title, rating, count FROM film WHERE id = ?";
 
-        try (Connection conn = ConnectionManager.getConnection();
+        try (Connection conn = ConnectionManager.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
             stmt.setInt(1, filmId);

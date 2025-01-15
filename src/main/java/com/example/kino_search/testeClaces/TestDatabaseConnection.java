@@ -12,7 +12,7 @@ public class TestDatabaseConnection {
     public static void main(String[] args) {
         try {
             logger.info("Starting database connection test...");
-            Connection connection = ConnectionManager.getConnection();
+            Connection connection = ConnectionManager.getInstance().getConnection();
 
             if (connection != null) {
                 logger.info("Database connection test successful!");
