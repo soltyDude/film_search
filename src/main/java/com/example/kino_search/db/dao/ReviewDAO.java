@@ -2,6 +2,7 @@ package com.example.kino_search.db.dao;
 
 import com.example.kino_search.db.ConnectionManager;
 import com.example.kino_search.db.FilmService;
+import com.example.kino_search.db.dao.interfaces.IReviewDAO;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -14,7 +15,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class ReviewDAO {
+public class ReviewDAO implements IReviewDAO {
 
     private static final Logger logger = Logger.getLogger(ReviewDAO.class.getName());
     private static volatile ReviewDAO instance;

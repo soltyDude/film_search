@@ -1,6 +1,7 @@
 package com.example.kino_search.db.dao;
 
 import com.example.kino_search.db.ConnectionManager;
+import com.example.kino_search.db.dao.interfaces.IGenreFilmDAO;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,7 +14,7 @@ import java.util.logging.Logger;
  * This class provides functionality to save a genre-film association into the database.
  * Implemented as a Singleton to ensure only one instance is used throughout the application.
  */
-public class GenreFilmDAO {
+public class GenreFilmDAO implements IGenreFilmDAO {
 
     private static final Logger logger = Logger.getLogger(GenreFilmDAO.class.getName());
     private static volatile GenreFilmDAO instance;

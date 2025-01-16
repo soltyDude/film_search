@@ -1,6 +1,7 @@
 package com.example.kino_search.db.dao;
 
 import com.example.kino_search.db.ConnectionManager;
+import com.example.kino_search.db.dao.interfaces.IFilmDAO;
 import com.example.kino_search.model.Film;
 
 import java.sql.Connection;
@@ -12,7 +13,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class FilmDAO {
+public class FilmDAO implements IFilmDAO {
     private static volatile FilmDAO instance;
 
     private static final Logger logger = Logger.getLogger(FilmDAO.class.getName());

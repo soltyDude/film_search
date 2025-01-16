@@ -2,6 +2,8 @@ package com.example.kino_search.db.dao;
 
 import com.example.kino_search.db.ConnectionManager;
 import com.example.kino_search.db.FilmService;
+import com.example.kino_search.db.dao.interfaces.IPlaylistDAO;
+import com.example.kino_search.db.dao.interfaces.IPlaylistFilmDAO;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -9,7 +11,7 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class PlaylistFilmDAO {
+public class PlaylistFilmDAO implements IPlaylistFilmDAO {
 
     private static final Logger logger = Logger.getLogger(PlaylistFilmDAO.class.getName());
     private static volatile PlaylistFilmDAO instance;

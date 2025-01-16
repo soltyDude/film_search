@@ -1,6 +1,7 @@
 package com.example.kino_search.db.dao;
 
 import com.example.kino_search.db.ConnectionManager;
+import com.example.kino_search.db.dao.interfaces.IUserDAO;
 import com.example.kino_search.util.TMDBApiUtil;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -15,7 +16,7 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class UserDAO {
+public class UserDAO implements IUserDAO {
 
     private static final Logger logger = Logger.getLogger(UserDAO.class.getName());
     private static volatile UserDAO instance;

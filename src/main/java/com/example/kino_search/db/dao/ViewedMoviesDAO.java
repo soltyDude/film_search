@@ -1,6 +1,7 @@
 package com.example.kino_search.db.dao;
 
 import com.example.kino_search.db.ConnectionManager;
+import com.example.kino_search.db.dao.interfaces.IViewedMoviesDAO;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,7 +11,7 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class ViewedMoviesDAO {
+public class ViewedMoviesDAO implements IViewedMoviesDAO {
 
     private static final Logger logger = Logger.getLogger(ViewedMoviesDAO.class.getName());
     private static volatile ViewedMoviesDAO instance;

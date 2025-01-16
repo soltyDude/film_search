@@ -1,6 +1,7 @@
 package com.example.kino_search.db.dao;
 
 import com.example.kino_search.db.ConnectionManager;
+import com.example.kino_search.db.dao.interfaces.IPlaylistDAO;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -12,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-public class PlaylistDAO {
+public class PlaylistDAO implements IPlaylistDAO {
 
     private static final Logger logger = Logger.getLogger(PlaylistDAO.class.getName());
     private static volatile PlaylistDAO instance;
