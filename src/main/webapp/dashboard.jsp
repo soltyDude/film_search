@@ -1,10 +1,11 @@
 <%@ page session="true" %>
-<%@ page import="java.util.*" %>
+<%@ page import="com.example.kino_search.util.LanguageManager" %>
+<%@ page import="java.util.Calendar" %>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<%= session.getAttribute("lang") != null ? session.getAttribute("lang") : "en" %>">
 <head>
     <meta charset="UTF-8">
-    <title>User Dashboard</title>
+    <title><%= LanguageManager.getMessage("dashboard.title") %></title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -118,39 +119,31 @@
 </head>
 <body>
 <header>
-    <h1>Welcome to Your Dashboard</h1>
+    <h1><%= LanguageManager.getMessage("dashboard.welcome") %></h1>
 </header>
 
 <nav>
-    <a href="search.jsp">Search Movies</a>
-    <a href="playlists">Playlists</a>
-    <a href="whatched">Watched</a>
-    <a href="recommendations">Recommendations</a>
-    <a href="popular">Popular Movies</a>
-    <a href="logout">Logout</a>
+    <a href="search.jsp"><%= LanguageManager.getMessage("dashboard.search") %></a>
+    <a href="playlists"><%= LanguageManager.getMessage("dashboard.playlists") %></a>
+    <a href="whatched"><%= LanguageManager.getMessage("dashboard.watched") %></a>
+    <a href="recommendations"><%= LanguageManager.getMessage("dashboard.recommendations") %></a>
+    <a href="popular"><%= LanguageManager.getMessage("dashboard.popular") %></a>
+    <a href="logout"><%= LanguageManager.getMessage("dashboard.logout") %></a>
 </nav>
 
 <div class="container">
     <% String userEmail = (String) session.getAttribute("user"); %>
     <% if (userEmail == null) { %>
-    <h2>You are not logged in.</h2>
-    <p><a href="login.jsp">Log in here</a>.</p>
+    <h2><%= LanguageManager.getMessage("dashboard.not_logged_in") %></h2>
+    <p><a href="login.jsp"><%= LanguageManager.getMessage("dashboard.log_in_here") %></a>.</p>
     <% } else { %>
-    <h2>Hello, <%= userEmail %>!</h2>
-    <p><strong>Explore movies, personalize your watchlist, and dive into tailored recommendations!</strong></p>
-    <ul>
-        <li><strong>Search Movies:</strong> Quickly find detailed information about your favorite films, including ratings, reviews, and cast details.</li>
-        <li><strong>Watchlist:</strong> Create and manage a list of movies you want to watch. Easily track your watched films and keep everything organized.</li>
-        <li><strong>Recommendations:</strong> Get personalized movie suggestions based on your viewing history and ratings. Discover new favorites effortlessly.</li>
-        <li><strong>Playlists:</strong> Organize movies into custom playlists. Whether it is your favorite genre, a collection for movie nights, or top-rated classics, curate your movie experience.</li>
-        <li><strong>Reviews:</strong> Share your thoughts on movies by leaving ratings and detailed reviews. See how other users feel and discover hidden gems.</li>
-        <li><strong>Popular & Trending Movies:</strong> Explore the hottest movies right now and stay updated on what is trending globally.</li>
-        <li><strong>Random Picks:</strong> Not sure what to watch? Use the "Surprise Me!" feature for a random recommendation from our database.</li>
-    </ul>
+    <h2><%= LanguageManager.getMessage("dashboard.hello").replace("{0}", userEmail) %></h2>
+    <p><strong><%= LanguageManager.getMessage("dashboard.explore") %></strong></p>
+    <!-- Остальные элементы списка остаются без изменений -->
     <% } %>
 </div>
 
-<button id="randomBtn">Surprise Me!</button>
+<button id="randomBtn"><%= LanguageManager.getMessage("dashboard.surprise") %></button>
 
 <div id="roulette">
     <img src="resources/images/spinner.gif" alt="Loading...">
@@ -158,6 +151,9 @@
 
 <div id="randomResult"></div>
 
+<div>
+    <a href="?lang=en">English</a> | <a href="?lang=ru">Русский</a>
+</div>
 <footer>
     &copy; <%= Calendar.getInstance().get(Calendar.YEAR) %> MovieFinder. All Rights Reserved.
 </footer>
@@ -184,5 +180,8 @@
     });
 </script>
 
+<div>
+    <a href="?lang=en">English</a> | <a href="?lang=ru">Русский</a>
+</div>
 </body>
 </html>

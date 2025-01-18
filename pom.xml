@@ -103,13 +103,20 @@
       </dependency>
 
 
+      <dependency>
+          <groupId>javax.servlet</groupId>
+          <artifactId>jstl</artifactId>
+          <version>1.2</version>
+      </dependency>
+
+
 
   </dependencies>
 
     <build>
         <resources>
             <resource>
-                <directory>src/main/webapp/resources</directory>
+                <directory>src/main/resources</directory>
                 <includes>
                     <include>**/*</include>
                 </includes>

@@ -5,21 +5,26 @@ import com.example.kino_search.db.dao.GenreDAO;
 import com.example.kino_search.db.dao.GenreFilmDAO;
 import com.example.kino_search.db.tmdb.TMDBClient;
 import com.example.kino_search.model.Film;
+import com.example.kino_search.model.FilmDTO;
+import com.example.kino_search.model.FilmMapper;
 import com.example.kino_search.util.TMDBApiUtil;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import java.sql.*;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class FilmService {
 
     private static final Logger logger = Logger.getLogger(FilmService.class.getName());
 
     private static volatile FilmService instance;
+    private final FilmDAO filmDAO = FilmDAO.getInstance();
 
     // Private constructor to prevent instantiation
     private FilmService() {}
@@ -267,4 +272,11 @@ public class FilmService {
         return false;
     }
 
+    public FilmDTO getFilmDTOById(int id) {
+        Film film = filmDAO.getFilmById(id);
+        if (film == null) {
+            throw new IllegalArgumentException("Film not found with ID: " + id);
+        }
+        return FilmMapper.toDTO(film);
+    }
 }
