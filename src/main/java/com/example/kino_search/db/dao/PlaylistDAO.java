@@ -1,7 +1,9 @@
 package com.example.kino_search.db.dao;
 
 import com.example.kino_search.model.Playlist;
+import com.example.kino_search.model.PlaylistFilm;
 import com.example.kino_search.util.HibernateUtil;
+import jakarta.persistence.criteria.*;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
@@ -115,19 +117,31 @@ public class PlaylistDAO {
         }
     }
 
-    public Playlist getPlaylistDetails(int playlistId) {
+    public Playlist getPlaylistDetails(int playlistId, String sortBy) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            Query<Playlist> query = session.createQuery(
-                    "SELECT p FROM Playlist p LEFT JOIN FETCH p.playlistFilms pf LEFT JOIN FETCH pf.film WHERE p.id = :playlistId",
-                    Playlist.class
-            );
-            query.setParameter("playlistId", playlistId);
-            return query.uniqueResult();
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Playlist> query = cb.createQuery(Playlist.class);
+
+            Root<Playlist> playlistRoot = query.from(Playlist.class);
+            Fetch<Playlist, PlaylistFilm> playlistFilmsFetch = playlistRoot.fetch("playlistFilms", JoinType.LEFT);
+            playlistFilmsFetch.fetch("film", JoinType.LEFT);
+
+            query.select(playlistRoot)
+                    .where(cb.equal(playlistRoot.get("id"), playlistId));
+
+            // Динамическая сортировка
+            if (sortBy != null && !sortBy.isEmpty()) {
+                query.orderBy(cb.asc(playlistRoot.join("playlistFilms").join("film").get(sortBy)));
+            }
+
+            return session.createQuery(query).uniqueResult();
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error retrieving playlist details for ID: " + playlistId, e);
             return null;
         }
     }
+
+
 
 
 }
