@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+    <session-factory>
+        <!-- Настройки подключения к базе данных -->
+        <property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
+
+
+        <!-- Диалект для PostgreSQL -->
+        <property name="hibernate.dialect">org.hibernate.dialect.PostgreSQL95Dialect</property>
+
+        <!-- Логирование запросов -->
+        <property name="hibernate.show_sql">true</property>
+        <property name="hibernate.format_sql">true</property>
+
+        <!-- Управление схемой базы данных -->
+        <property name="hibernate.hbm2ddl.auto">update</property>
+
+        <!-- Кэширование -->
+        <property name="hibernate.cache.use_second_level_cache">true</property>
+        <property name="hibernate.cache.region.factory_class">org.hibernate.cache.ehcache.EhCacheRegionFactory</property>
+
+        <!-- Укажите классы сущностей -->
+        <mapping class="com.example.kino_search.model.Film"/>
+        <mapping class="com.example.kino_search.model.Genre"/>
+    </session-factory>
+</hibernate-configuration>

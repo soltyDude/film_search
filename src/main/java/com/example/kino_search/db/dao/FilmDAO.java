@@ -52,7 +52,7 @@ public class FilmDAO implements IFilmDAO {
             try (PreparedStatement stmt = conn.prepareStatement(sqlInsert)) {
                 stmt.setInt(1, film.getApiId());
                 stmt.setString(2, film.getTitle());
-                stmt.setDate(3, film.getReleaseDate());
+                stmt.setDate(3, java.sql.Date.valueOf(film.getReleaseDate()));
                 stmt.setString(4, film.getPosterUrl());
                 stmt.setInt(5, film.getRuntime());
                 stmt.setFloat(6, film.getApiRating());
@@ -94,7 +94,7 @@ public class FilmDAO implements IFilmDAO {
                 film.setId(rs.getInt("id"));
                 film.setApiId(rs.getInt("api_id"));
                 film.setTitle(rs.getString("title"));
-                film.setReleaseDate(rs.getDate("release_date"));
+                film.setReleaseDate(rs.getDate("release_date").toLocalDate());
                 film.setPosterUrl(rs.getString("poster_url"));
                 film.setRuntime(rs.getInt("runtime"));
                 film.setApiRating(rs.getFloat("api_rating"));
@@ -123,7 +123,7 @@ public class FilmDAO implements IFilmDAO {
                 film.setId(rs.getInt("id"));
                 film.setApiId(rs.getInt("api_id"));
                 film.setTitle(rs.getString("title"));
-                film.setReleaseDate(rs.getDate("release_date"));
+                film.setReleaseDate(rs.getDate("release_date").toLocalDate());
                 film.setPosterUrl(rs.getString("poster_url"));
                 film.setRuntime(rs.getInt("runtime"));
                 film.setApiRating(rs.getFloat("api_rating"));

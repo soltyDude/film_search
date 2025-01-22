@@ -51,9 +51,9 @@ public class TMDBUpdater {
         film.setPosterUrl("https://image.tmdb.org/t/p/w500" + filmJson.get("poster_path").getAsString());
 
         if (!filmJson.get("release_date").isJsonNull()) {
-            film.setReleaseDate(Date.valueOf(filmJson.get("release_date").getAsString()));
+            film.setReleaseDate(Date.valueOf(filmJson.get("release_date").getAsString()).toLocalDate());
         } else {
-            film.setReleaseDate(new Date(System.currentTimeMillis()));
+            film.setReleaseDate(new Date(System.currentTimeMillis()).toLocalDate());
         }
 
         float apiRating = filmJson.get("vote_average").getAsFloat();

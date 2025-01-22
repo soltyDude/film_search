@@ -67,7 +67,7 @@ public class FilmService {
 
             film.setApiId(apiId);
             film.setTitle(movieDetails.get("title").getAsString());
-            film.setReleaseDate(Date.valueOf(movieDetails.get("release_date").getAsString()));
+            film.setReleaseDate(Date.valueOf(movieDetails.get("release_date").getAsString()).toLocalDate());
             film.setPosterUrl("https://image.tmdb.org/t/p/w500" + movieDetails.get("poster_path").getAsString());
             film.setRuntime(movieDetails.get("runtime").getAsInt());
             film.setApiRating(movieDetails.get("vote_average").getAsFloat());
