@@ -30,7 +30,7 @@ public class Film {
     private float apiRating;
 
     @Column(name = "rating")
-    private Float rating;
+    private Double rating;
 
     @Column(name = "api_count", nullable = false)
     private int apiCount;
@@ -38,7 +38,7 @@ public class Film {
     @Column(name = "count", nullable = false)
     private int count;
 
-    @Column(name = "overview")
+    @Column(name = "overview", columnDefinition = "TEXT")
     private String overview;
 // Геттеры и сеттеры
     public int getId() {
@@ -97,11 +97,11 @@ public class Film {
         this.apiRating = apiRating;
     }
 
-    public Float getRating() {
+    public Double getRating() {
         return rating;
     }
 
-    public void setRating(Float rating) {
+    public void setRating(Double rating) {
         this.rating = rating;
     }
 

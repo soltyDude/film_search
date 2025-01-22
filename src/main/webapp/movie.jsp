@@ -1,5 +1,6 @@
-<%@ page import="java.util.Map" %>
+<%@ page import="com.example.kino_search.model.Review" %>
 <%@ page import="java.util.List" %>
+<%@ page import="java.util.Map" %>
 <%@ page session="true" %>
 <!DOCTYPE html>
 <html lang="en">
@@ -184,14 +185,14 @@
     </form>
 
     <%
-      List<Map<String, Object>> reviews = (List<Map<String, Object>>) request.getAttribute("reviews");
+      List<Review> reviews = (List<Review>) request.getAttribute("reviews");
       if (reviews != null && !reviews.isEmpty()) {
-        for (Map<String, Object> review : reviews) {
+        for (Review review : reviews) {
     %>
     <div class="review">
-      <p><strong>Rating:</strong> <%= review.get("rating") %> stars</p>
-      <p><%= review.get("review_text") %></p>
-      <p><em>Reviewed by User <%= review.get("user_nickname") %></em></p>
+      <p><strong>Rating:</strong> <%= review.getRating() %> stars</p>
+      <p><%= review.getReviewText() %></p>
+      <p><em>Reviewed by User ID: <%= review.getUserId() %></em></p>
     </div>
     <%
       }

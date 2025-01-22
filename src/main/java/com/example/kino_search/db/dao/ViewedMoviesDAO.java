@@ -1,30 +1,24 @@
 package com.example.kino_search.db.dao;
 
-import com.example.kino_search.db.ConnectionManager;
-import com.example.kino_search.db.dao.interfaces.IViewedMoviesDAO;
+import com.example.kino_search.model.ViewedMovie;
+import com.example.kino_search.util.HibernateUtil;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import org.hibernate.query.Query;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.*;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class ViewedMoviesDAO implements IViewedMoviesDAO {
+public class ViewedMoviesDAO {
 
     private static final Logger logger = Logger.getLogger(ViewedMoviesDAO.class.getName());
     private static volatile ViewedMoviesDAO instance;
 
-    // Private constructor to prevent instantiation
     private ViewedMoviesDAO() {}
 
-    /**
-     * Returns the singleton instance of the GenreFilmDAO class.
-     * Uses double-checked locking for thread safety.
-     *
-     * @return The singleton instance of GenreFilmDAO.
-     */
     public static ViewedMoviesDAO getInstance() {
         if (instance == null) {
             synchronized (ViewedMoviesDAO.class) {
@@ -35,153 +29,109 @@ public class ViewedMoviesDAO implements IViewedMoviesDAO {
         }
         return instance;
     }
+
     // Добавление фильма в просмотренные
     public boolean addMovieToViewed(int userId, int filmId, Integer reviewId) {
-        String sql = """
-            INSERT INTO viewed_movies (user_id, film_id, reviews_id) 
-            VALUES (?, ?, ?) 
-            ON CONFLICT (user_id, film_id) DO NOTHING
-            """;
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Transaction transaction = session.beginTransaction();
 
-        try (Connection conn = ConnectionManager.getInstance().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            ViewedMovie viewedMovie = new ViewedMovie();
+            viewedMovie.setUserId(userId);
+            viewedMovie.setFilmId(filmId);
+            viewedMovie.setReviewId(reviewId);
+            viewedMovie.setViewedAt(LocalDateTime.now()); // Установка текущего времени
 
-            stmt.setInt(1, userId);
-            stmt.setInt(2, filmId);
-            if (reviewId != null) {
-                stmt.setInt(3, reviewId);
-            } else {
-                stmt.setNull(3, java.sql.Types.INTEGER);
-            }
+            session.saveOrUpdate(viewedMovie);
 
-            int rowsAffected = stmt.executeUpdate();
-            if (rowsAffected > 0) {
-                logger.info("Movie added to viewed_movies: User ID = " + userId + ", Film ID = " + filmId);
-                return true;
-            } else {
-                logger.info("Movie already exists in viewed_movies: User ID = " + userId + ", Film ID = " + filmId);
-            }
-        } catch (SQLException e) {
+            transaction.commit();
+            logger.info("Movie added to viewed_movies: User ID = " + userId + ", Film ID = " + filmId);
+            return true;
+        } catch (Exception e) {
             logger.log(Level.SEVERE, "Error adding movie to viewed_movies", e);
+            return false;
         }
-        return false;
     }
 
     // Удаление фильма из просмотренных
     public boolean removeMovieFromViewed(int userId, int filmId) {
-        String sql = "DELETE FROM viewed_movies WHERE user_id = ? AND film_id = ?";
-        try (Connection conn = ConnectionManager.getInstance().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Transaction transaction = session.beginTransaction();
 
-            stmt.setInt(1, userId);
-            stmt.setInt(2, filmId);
+            Query<?> query = session.createQuery("DELETE FROM ViewedMovie WHERE userId = :userId AND filmId = :filmId");
+            query.setParameter("userId", userId);
+            query.setParameter("filmId", filmId);
 
-            int rowsAffected = stmt.executeUpdate();
+            int rowsAffected = query.executeUpdate();
+            transaction.commit();
+
             if (rowsAffected > 0) {
                 logger.info("Movie removed from viewed_movies: User ID = " + userId + ", Film ID = " + filmId);
                 return true;
             } else {
                 logger.info("No movie found to remove in viewed_movies: User ID = " + userId + ", Film ID = " + filmId);
+                return false;
             }
-        } catch (SQLException e) {
+        } catch (Exception e) {
             logger.log(Level.SEVERE, "Error removing movie from viewed_movies", e);
+            return false;
         }
-        return false;
     }
 
     // Проверка, существует ли фильм в просмотренных
     public boolean isMovieInViewed(int userId, int filmId) {
-        String sql = "SELECT 1 FROM viewed_movies WHERE user_id = ? AND film_id = ?";
-        try (Connection conn = ConnectionManager.getInstance().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Query<Long> query = session.createQuery(
+                    "SELECT COUNT(v) FROM ViewedMovie v WHERE v.userId = :userId AND v.filmId = :filmId", Long.class);
+            query.setParameter("userId", userId);
+            query.setParameter("filmId", filmId);
 
-            stmt.setInt(1, userId);
-            stmt.setInt(2, filmId);
-
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                logger.info("Movie exists in viewed_movies: User ID = " + userId + ", Film ID = " + filmId);
-                return true;
-            }
-        } catch (SQLException e) {
+            long count = query.uniqueResult();
+            return count > 0;
+        } catch (Exception e) {
             logger.log(Level.SEVERE, "Error checking if movie exists in viewed_movies", e);
+            return false;
         }
-        return false;
     }
 
     // Получение списка просмотренных фильмов для пользователя
-    public List<Map<String, Object>> getViewedMoviesByUserId(int userId) {
-        String sql = """
-        SELECT v.viewed_at, f.api_id, f.title, f.poster_url, r.rating
-        FROM viewed_movies v
-        JOIN film f ON v.film_id = f.id
-        LEFT JOIN reviews r ON r.user_id = v.user_id AND r.film_id = v.film_id
-        WHERE v.user_id = ?
-        ORDER BY v.viewed_at DESC
-    """;
-
-        List<Map<String, Object>> viewedMovies = new ArrayList<>();
-
-        try (Connection conn = ConnectionManager.getInstance().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, userId);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    Map<String, Object> movie = new HashMap<>();
-                    movie.put("viewed_at", rs.getTimestamp("viewed_at"));
-                    movie.put("apiId", rs.getInt("api_id"));
-                    movie.put("title", rs.getString("title"));
-                    movie.put("poster_url", rs.getString("poster_url"));
-
-                    int rating = rs.getInt("rating");
-                    if (rs.wasNull()) {
-                        movie.put("rating", null); // или можно просто не класть ключ, если нет рейтинга
-                    } else {
-                        movie.put("rating", rating);
-                    }
-
-                    viewedMovies.add(movie);
-                }
-            }
-        } catch (SQLException e) {
+    public List<ViewedMovie> getViewedMoviesByUserId(int userId) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Query<ViewedMovie> query = session.createQuery(
+                    "FROM ViewedMovie WHERE userId = :userId ORDER BY viewedAt DESC", ViewedMovie.class);
+            query.setParameter("userId", userId);
+            return query.list();
+        } catch (Exception e) {
             logger.log(Level.SEVERE, "Error retrieving viewed movies for user ID " + userId, e);
+            return List.of();
         }
-
-        return viewedMovies;
     }
 
-
-    // Обновление записи о просмотренном фильме (например, добавление review_id)
+    // Обновление записи о просмотренном фильме (например, добавление reviewId)
     public boolean updateViewedMovie(int userId, int filmId, Integer reviewId) {
-        String sql = """
-            UPDATE viewed_movies
-            SET reviews_id = ?
-            WHERE user_id = ? AND film_id = ?
-        """;
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Transaction transaction = session.beginTransaction();
 
-        try (Connection conn = ConnectionManager.getInstance().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            Query<ViewedMovie> query = session.createQuery(
+                    "FROM ViewedMovie WHERE userId = :userId AND filmId = :filmId", ViewedMovie.class);
+            query.setParameter("userId", userId);
+            query.setParameter("filmId", filmId);
 
-            if (reviewId != null) {
-                stmt.setInt(1, reviewId);
-            } else {
-                stmt.setNull(1, java.sql.Types.INTEGER);
-            }
-            stmt.setInt(2, userId);
-            stmt.setInt(3, filmId);
+            Optional<ViewedMovie> viewedMovieOpt = query.uniqueResultOptional();
 
-            int rowsAffected = stmt.executeUpdate();
-            if (rowsAffected > 0) {
+            if (viewedMovieOpt.isPresent()) {
+                ViewedMovie viewedMovie = viewedMovieOpt.get();
+                viewedMovie.setReviewId(reviewId);
+                session.update(viewedMovie);
+                transaction.commit();
                 logger.info("Viewed movie updated: User ID = " + userId + ", Film ID = " + filmId + ", Review ID = " + reviewId);
                 return true;
             } else {
                 logger.info("No viewed movie found to update: User ID = " + userId + ", Film ID = " + filmId);
+                return false;
             }
-        } catch (SQLException e) {
+        } catch (Exception e) {
             logger.log(Level.SEVERE, "Error updating viewed movie", e);
+            return false;
         }
-        return false;
     }
 }

@@ -1,34 +1,23 @@
 package com.example.kino_search.db.dao;
 
-import com.example.kino_search.db.ConnectionManager;
-import com.example.kino_search.db.FilmService;
-import com.example.kino_search.db.dao.interfaces.IReviewDAO;
+import com.example.kino_search.model.Review;
+import com.example.kino_search.model.ViewedMovie;
+import com.example.kino_search.util.HibernateUtil;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class ReviewDAO implements IReviewDAO {
+public class ReviewDAO {
 
     private static final Logger logger = Logger.getLogger(ReviewDAO.class.getName());
     private static volatile ReviewDAO instance;
 
-    // Private constructor to prevent instantiation
     private ReviewDAO() {}
 
-    /**
-     * Returns the singleton instance of the GenreFilmDAO class.
-     * Uses double-checked locking for thread safety.
-     *
-     * @return The singleton instance of GenreFilmDAO.
-     */
     public static ReviewDAO getInstance() {
         if (instance == null) {
             synchronized (ReviewDAO.class) {
@@ -39,195 +28,107 @@ public class ReviewDAO implements IReviewDAO {
         }
         return instance;
     }
-    public boolean addReview(int userId, int filmAPIId, int rating, String reviewText) {
-        String reviewSql = """
-        INSERT INTO reviews (user_id, film_id, rating, review_text) 
-        VALUES (?, ?, ?, ?)
-        RETURNING id
-    """;
 
-        String updateViewedMovieSql = """
-        UPDATE viewed_movies
-        SET reviews_id = ?
-        WHERE user_id = ? AND film_id = ?
-    """;
+    public boolean addReview(int userId, int filmId, int rating, String reviewText) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Transaction transaction = session.beginTransaction();
 
-        try (Connection conn = ConnectionManager.getInstance().getConnection();
-             PreparedStatement reviewStmt = conn.prepareStatement(reviewSql);
-             PreparedStatement updateViewedMovieStmt = conn.prepareStatement(updateViewedMovieSql)) {
+            // Создаем новый отзыв
+            Review review = new Review();
+            review.setUserId(userId);
+            review.setFilmId(filmId);
+            review.setRating(rating);
+            review.setReviewText(reviewText);
+            review.setCreatedAt(LocalDateTime.now());
+            review.setUpdatedAt(LocalDateTime.now());
 
-            int filmId = FilmService.getInstance().getFilmIdByApiId(filmAPIId);
+            session.save(review);
 
-            // Добавляем отзыв
-            reviewStmt.setInt(1, userId);
-            reviewStmt.setInt(2, filmId);
-            reviewStmt.setInt(3, rating);
-            reviewStmt.setString(4, reviewText);
+            // Обновляем таблицу `viewed_movies`
+            ViewedMovie viewedMovie = session.createQuery(
+                            "from ViewedMovie where userId = :userId and filmId = :filmId", ViewedMovie.class)
+                    .setParameter("userId", userId)
+                    .setParameter("filmId", filmId)
+                    .uniqueResult();
 
-            int reviewId = -1;
-            try (ResultSet rs = reviewStmt.executeQuery()) {
-                if (rs.next()) {
-                    reviewId = rs.getInt("id");
-                }
+            if (viewedMovie != null) {
+                viewedMovie.setReviewId(review.getId());
+                session.update(viewedMovie);
             }
 
-            if (reviewId == -1) {
-                throw new SQLException("Failed to retrieve the generated review ID.");
-            }
-
-            // Обновляем поле reviews_id в просмотренных фильмах
-            updateViewedMovieStmt.setInt(1, reviewId);
-            updateViewedMovieStmt.setInt(2, userId);
-            updateViewedMovieStmt.setInt(3, filmId);
-            int viewedMovieRowsAffected = updateViewedMovieStmt.executeUpdate();
-
-            logger.info("Review added and movie's reviews_id updated: User ID = " + userId + ", Film ID = " + filmId + ", Review ID = " + reviewId + ", Rating = " + rating);
-
-            // Поскольку обновление рейтинга убрано, проверим только успешность добавления отзыва.
-            return viewedMovieRowsAffected > 0;
-
-        } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Error adding review and updating viewed_movie's reviews_id", e);
+            transaction.commit();
+            logger.info("Review added successfully: User ID = " + userId + ", Film ID = " + filmId);
+            return true;
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error adding review", e);
             return false;
         }
     }
 
-
-
-
     public boolean isReviewExists(int userId, int filmId) {
-        String sql = """
-        SELECT 1 
-        FROM reviews 
-        WHERE user_id = ? AND film_id = ?
-    """;
-        try (Connection conn = ConnectionManager.getInstance().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, userId);
-            stmt.setInt(2, filmId);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                return rs.next(); // Если результат есть, отзыв существует
-            }
-        } catch (SQLException e) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Long count = session.createQuery(
+                            "select count(r) from Review r where r.userId = :userId and r.filmId = :filmId", Long.class)
+                    .setParameter("userId", userId)
+                    .setParameter("filmId", filmId)
+                    .uniqueResult();
+            return count != null && count > 0;
+        } catch (Exception e) {
             logger.log(Level.SEVERE, "Error checking if review exists", e);
+            return false;
         }
-        return false;
     }
 
-
-    public List<Map<String, Object>> getReviewsByFilmId(int filmId) {
-        String sql = """
-        SELECT user_id, rating, review_text, created_at 
-        FROM reviews WHERE film_id = ?
-    """;
-        List<Map<String, Object>> reviews = new ArrayList<>();
-        try (Connection conn = ConnectionManager.getInstance().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-
-
-            stmt.setInt(1, filmId);
-            try (ResultSet rs = stmt.executeQuery()) {
-
-
-                while (rs.next()) {
-                    Map<String, Object> review = new HashMap<>();
-                    int userId = rs.getInt("user_id");
-                    String nickname = UserDAO.getInstance().getUserNicknameById(userId);
-
-                    review.put("user_id", userId);
-                    review.put("user_nickname", nickname);
-                    review.put("rating", rs.getInt("rating"));
-                    review.put("review_text", rs.getString("review_text"));
-                    review.put("created_at", rs.getTimestamp("created_at"));
-                    reviews.add(review);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+    public List<Review> getReviewsByFilmId(int filmId) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery("from Review where filmId = :filmId", Review.class)
+                    .setParameter("filmId", filmId)
+                    .getResultList();
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error fetching reviews by film ID", e);
+            return null;
         }
-        return reviews;
     }
 
-    public Map<String, Object> getReviewByUserAndFilm(int userId, int filmId) {
-        String sql = "SELECT rating, review_text FROM reviews WHERE user_id = ? AND film_id = ?";
-        try (Connection conn = ConnectionManager.getInstance().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, userId);
-            stmt.setInt(2, filmId);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    Map<String, Object> review = new HashMap<>();
-                    review.put("rating", rs.getInt("rating"));
-                    String reviewText = rs.getString("review_text");
-                    review.put("review_text", reviewText);
-                    return review;
-                }
-            }
-        } catch (SQLException e) {
-            Logger.getLogger(ReviewDAO.class.getName()).log(Level.SEVERE, "Error fetching review by user and film", e);
+    public Review getReviewByUserAndFilm(int userId, int filmId) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery(
+                            "from Review where userId = :userId and filmId = :filmId", Review.class)
+                    .setParameter("userId", userId)
+                    .setParameter("filmId", filmId)
+                    .uniqueResult();
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error fetching review by user and film", e);
+            return null;
         }
-        return null;
     }
 
     public boolean updateReview(int userId, int filmId, int newRating, String newReviewText) {
-        // Обновляем отзыв
-        String updateReviewSql = """
-        UPDATE reviews
-        SET rating = ?, review_text = ?, updated_at = CURRENT_TIMESTAMP
-        WHERE user_id = ? AND film_id = ?
-    """;
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Transaction transaction = session.beginTransaction();
 
-        // После обновления отзыва нужно пересчитать рейтинг фильма.
-        // Посчитаем заново средний рейтинг и количество отзывов для этого фильма.
-        String avgSql = "SELECT AVG(rating) as avg_rating, COUNT(*) as cnt FROM reviews WHERE film_id = ?";
+            Review review = session.createQuery(
+                            "from Review where userId = :userId and filmId = :filmId", Review.class)
+                    .setParameter("userId", userId)
+                    .setParameter("filmId", filmId)
+                    .uniqueResult();
 
-        String updateFilmSql = """
-        UPDATE film
-        SET rating = ?, count = ?
-        WHERE id = ?
-    """;
-
-        try (Connection conn = ConnectionManager.getInstance().getConnection();
-             PreparedStatement updateReviewStmt = conn.prepareStatement(updateReviewSql);
-             PreparedStatement avgStmt = conn.prepareStatement(avgSql);
-             PreparedStatement updateFilmStmt = conn.prepareStatement(updateFilmSql)) {
-
-            updateReviewStmt.setInt(1, newRating);
-            updateReviewStmt.setString(2, newReviewText);
-            updateReviewStmt.setInt(3, userId);
-            updateReviewStmt.setInt(4, filmId);
-
-            int reviewRows = updateReviewStmt.executeUpdate();
-            if (reviewRows == 0) {
-                // Не найден отзыв для обновления
+            if (review == null) {
+                logger.warning("No review found for update: User ID = " + userId + ", Film ID = " + filmId);
                 return false;
             }
 
-            // Пересчёт среднего рейтинга
-            avgStmt.setInt(1, filmId);
-            double avgRating = 0;
-            int count = 0;
-            try (ResultSet rs = avgStmt.executeQuery()) {
-                if (rs.next()) {
-                    avgRating = rs.getDouble("avg_rating");
-                    count = rs.getInt("cnt");
-                }
-            }
+            review.setRating(newRating);
+            review.setReviewText(newReviewText);
+            review.setUpdatedAt(LocalDateTime.now());
+            session.update(review);
 
-            // Обновляем рейтинг фильма
-            updateFilmStmt.setDouble(1, avgRating);
-            updateFilmStmt.setInt(2, count);
-            updateFilmStmt.setInt(3, filmId);
-            updateFilmStmt.executeUpdate();
-
+            transaction.commit();
+            logger.info("Review updated successfully: User ID = " + userId + ", Film ID = " + filmId);
             return true;
-        } catch (SQLException e) {
-            Logger.getLogger(ReviewDAO.class.getName()).log(Level.SEVERE, "Error updating review and film rating", e);
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error updating review", e);
+            return false;
         }
-        return false;
     }
-
-
 }

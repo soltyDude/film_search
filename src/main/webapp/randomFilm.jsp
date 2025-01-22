@@ -1,6 +1,6 @@
-<%@ page import="java.util.Map" %>
+<%@ page import="com.example.kino_search.model.Film" %>
 <%
-  Map<String,Object> film = (Map<String,Object>) request.getAttribute("film");
+  Film film = (Film) request.getAttribute("film");
   if (film == null) {
     out.print("No film found");
     return;
@@ -17,9 +17,9 @@
 </head>
 <body>
 <h1>Random Movie</h1>
-<p>Title: <%= film.get("title") %></p>
-<img src="<%= film.get("poster_url") %>" alt="<%= film.get("title") %>" style="width:200px;">
+<p>Title: <%= film.getTitle() %></p>
+<img src="<%= film.getPosterUrl() %>" alt="<%= film.getTitle() %>" style="width:200px;">
 <!-- Можно добавить ссылку на страницу с деталями фильма -->
-<a href="movie?id=<%= film.get("apiId") %>">View Details</a>
+<a href="movie?id=<%= film.getApiId() %>">View Details</a>
 </body>
 </html>

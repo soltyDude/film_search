@@ -1,5 +1,6 @@
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.List" %>
+<%@ page import="com.example.kino_search.model.ViewedMovie" %>
 <%@ page session="true" %>
 <!DOCTYPE html>
 <html lang="en">
@@ -66,18 +67,18 @@
   <h1>Your Watched Movies</h1>
   <div class="movie-list">
     <%
-      List<Map<String, Object>> viewedMovies = (List<Map<String, Object>>) request.getAttribute("viewedMovies");
+      List<ViewedMovie> viewedMovies =(List<ViewedMovie>) request.getAttribute("viewedMovies");
       Integer userId = (Integer) session.getAttribute("userId"); // Предполагается, что userId хранится в сессии
       if (viewedMovies != null && !viewedMovies.isEmpty()) {
-        for (Map<String, Object> movie : viewedMovies) {
-          Object ratingObj = movie.get("rating");
+        for (ViewedMovie movie : viewedMovies) {
+          Object ratingObj = movie.getRating();
     %>
     <div class="movie-item">
-      <a href="movie?id=<%= movie.get("apiId") %>">
-        <img src="<%= movie.get("poster_url") %>" alt="<%= movie.get("title") %>">
+      <a href="movie?id=<%= movie.getApiId() %>">
+        <img src="<%= movie.getPosterUrl() %>" alt="<%= movie.getTitle() %>">
       </a>
-      <h3><%= movie.get("title") %></h3>
-      <p class="viewed-at">Viewed at: <%= movie.get("viewed_at") %></p>
+      <h3><%= movie.getTitle() %></h3>
+      <p class="viewed-at">Viewed at: <%= movie.getViewedAt() %></p>
       <%
         if (ratingObj != null) {
       %>
@@ -85,7 +86,7 @@
       <div class="review-button">
         <!-- Кнопка для редактирования отзыва -->
         <form action="<%= request.getContextPath() %>/reviewForm.jsp" method="get">
-          <input type="hidden" name="apiId" value="<%= movie.get("apiId") %>">
+          <input type="hidden" name="apiId" value="<%= movie.getApiId() %>">
           <input type="hidden" name="userId" value="<%= userId %>">
           <button type="submit">Edit Review</button>
         </form>
@@ -96,7 +97,7 @@
       <div class="review-button">
         <!-- Кнопка для добавления отзыва -->
         <form action="<%= request.getContextPath() %>/reviewForm.jsp" method="get">
-          <input type="hidden" name="apiId" value="<%= movie.get("apiId") %>">
+          <input type="hidden" name="apiId" value="<%= movie.getApiId() %>">
           <input type="hidden" name="userId" value="<%= userId %>">
           <button type="submit">Add Review</button>
         </form>

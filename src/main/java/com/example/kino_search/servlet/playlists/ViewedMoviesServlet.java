@@ -1,6 +1,7 @@
 package com.example.kino_search.servlet.playlists;
 
 import com.example.kino_search.db.dao.ViewedMoviesDAO;
+import com.example.kino_search.model.ViewedMovie;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,7 +10,6 @@ import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 
 public class ViewedMoviesServlet extends HttpServlet {
@@ -28,8 +28,8 @@ public class ViewedMoviesServlet extends HttpServlet {
         logger.info("Fetching viewed movies for user ID: " + userId);
 
         try {
-            // Получаем список просмотренных фильмов из базы данных
-            List<Map<String, Object>> viewedMovies = ViewedMoviesDAO.getInstance().getViewedMoviesByUserId(userId);
+            // Получаем список просмотренных фильмов
+            List<ViewedMovie> viewedMovies = ViewedMoviesDAO.getInstance().getViewedMoviesByUserId(userId);
 
             // Передаем данные в JSP
             request.setAttribute("viewedMovies", viewedMovies);

@@ -26,7 +26,7 @@ public class HibernateFilmTest {
                 film.setApiId(apiId);
                 film.setRuntime(148);
                 film.setApiRating(8.8f);
-                film.setRating(9.0f);
+                film.setRating(9.0d);
                 film.setApiCount(1000000);
                 film.setCount(500000);
                 film.setOverview("A thief who steals corporate secrets through the use of dream-sharing technology.");

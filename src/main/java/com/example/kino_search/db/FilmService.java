@@ -1,40 +1,31 @@
 package com.example.kino_search.db;
 
-import com.example.kino_search.db.dao.FilmDAO;
 import com.example.kino_search.db.dao.GenreDAO;
 import com.example.kino_search.db.dao.GenreFilmDAO;
-import com.example.kino_search.db.tmdb.TMDBClient;
 import com.example.kino_search.model.Film;
 import com.example.kino_search.model.FilmDTO;
 import com.example.kino_search.model.FilmMapper;
+import com.example.kino_search.util.HibernateUtil;
 import com.example.kino_search.util.TMDBApiUtil;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 
-import java.sql.*;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 public class FilmService {
 
     private static final Logger logger = Logger.getLogger(FilmService.class.getName());
-
     private static volatile FilmService instance;
-    private final FilmDAO filmDAO = FilmDAO.getInstance();
 
-    // Private constructor to prevent instantiation
     private FilmService() {}
 
-    /**
-     * Returns the singleton instance of the GenreFilmDAO class.
-     * Uses double-checked locking for thread safety.
-     *
-     * @return The singleton instance of GenreFilmDAO.
-     */
     public static FilmService getInstance() {
         if (instance == null) {
             synchronized (FilmService.class) {
@@ -47,236 +38,138 @@ public class FilmService {
     }
 
     public void fetchAndSaveFilm(int apiId) {
-        logger.info("Starting process to fetch and save film with API ID: " + apiId);
+        logger.info("Fetching and saving film with API ID: " + apiId);
 
-        try {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Transaction transaction = session.beginTransaction();
+
             // Проверяем, существует ли фильм в базе
-            Film existingFilm = FilmDAO.getInstance().getFilmByApiId(apiId);
+            Film film = session.createQuery("from Film where apiId = :apiId", Film.class)
+                    .setParameter("apiId", apiId)
+                    .uniqueResult();
 
-            if (existingFilm != null) {
-                logger.info("Film already exists in database: " + existingFilm.getTitle());
+            // Запрашиваем данные из TMDB API
+            if (film == null) {
+                film = new Film();
             }
 
-            // Запрос данных фильма из TMDB API
-            String endpoint = "/movie/" + apiId;
-            logger.info("Sending request to TMDB API for endpoint: " + endpoint);
-            JsonObject movieDetails = TMDBApiUtil.sendRequest(endpoint);
-
-            // Создание или обновление объекта Film
-            Film film = existingFilm != null ? existingFilm : new Film();
-
+            JsonObject movieDetails = TMDBApiUtil.sendRequest("/movie/" + apiId);
             film.setApiId(apiId);
             film.setTitle(movieDetails.get("title").getAsString());
-            film.setReleaseDate(Date.valueOf(movieDetails.get("release_date").getAsString()).toLocalDate());
+            film.setReleaseDate(LocalDate.parse(movieDetails.get("release_date").getAsString()));
             film.setPosterUrl("https://image.tmdb.org/t/p/w500" + movieDetails.get("poster_path").getAsString());
             film.setRuntime(movieDetails.get("runtime").getAsInt());
             film.setApiRating(movieDetails.get("vote_average").getAsFloat());
             film.setApiCount(movieDetails.get("vote_count").getAsInt());
             film.setOverview(movieDetails.get("overview").getAsString());
 
-            // Если фильм уже существует, сохраняем его `rating` и `count`
-            if (existingFilm != null) {
-                film.setRating(existingFilm.getRating());
-                film.setCount(existingFilm.getCount());
-            }
+            session.saveOrUpdate(film);
 
-            // Сохраняем фильм
-            logger.info("Saving film to database: " + film.getTitle());
-            FilmDAO.getInstance().saveOrUpdateFilm(film);
-
-            if (film.getId() == 0) {
-                logger.severe("Film ID is not set. Film might not have been saved properly.");
-                throw new IllegalStateException("Film ID is not set. Film might not have been saved properly.");
-            }
-
-            // Обработка жанров
             JsonArray genres = movieDetails.getAsJsonArray("genres");
-            logger.info("Processing genres for film: " + film.getTitle());
             for (int i = 0; i < genres.size(); i++) {
                 JsonObject genreObj = genres.get(i).getAsJsonObject();
                 String genreName = genreObj.get("name").getAsString();
                 int genreId = GenreDAO.getInstance().saveOrGetGenreId(genreName);
-
-                logger.info("Saving genre-film relation: Genre ID = " + genreId + ", Film ID = " + film.getId());
                 GenreFilmDAO.getInstance().saveGenreFilm(genreId, film.getId());
             }
 
+            transaction.commit();
             logger.info("Film and genres saved successfully: " + film.getTitle());
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Error occurred while processing film with API ID: " + apiId, e);
+            logger.log(Level.SEVERE, "Error while saving film with API ID: " + apiId, e);
         }
     }
-
 
     public String getFilmTitleByID(int id) {
-
-        String sql = "SELECT title FROM film WHERE id = ?";
-        try (Connection conn = ConnectionManager.getInstance().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, id);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    String title = rs.getString("title");
-                    logger.info("Film title retrieved successfully for Film ID: " + id + ", Title: " + title);
-                    return title;
-                } else {
-                    logger.warning("No film found with ID: " + id);
-                }
-            }
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Film film = session.get(Film.class, id);
+            return film != null ? film.getTitle() : null;
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Error retrieving film title for Film ID: " + id, e);
+            logger.log(Level.SEVERE, "Error fetching film title by ID: " + id, e);
+            return null;
         }
-        return null; // Return null if no film is found or an error occurred
     }
-
 
     public Integer getFilmIdByApiId(int apiId) {
-        String sql = "SELECT id FROM film WHERE api_id = ?";
-        try (Connection conn = ConnectionManager.getInstance().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, apiId);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    int filmId = rs.getInt("id");
-                    logger.info("Film ID retrieved successfully for API ID: " + apiId + ", Film ID: " + filmId);
-                    return filmId;
-                } else {
-                    logger.warning("No film found with API ID: " + apiId);
-                }
-            }
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Film film = session.createQuery("from Film where apiId = :apiId", Film.class)
+                    .setParameter("apiId", apiId)
+                    .uniqueResult();
+            return film != null ? film.getId() : null;
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Error retrieving film ID for API ID: " + apiId, e);
+            logger.log(Level.SEVERE, "Error fetching film ID by API ID: " + apiId, e);
+            return null;
         }
-        return null; // Return null if no film is found or an error occurred
     }
 
-
     public Map<String, Object> getFilmDetailsById(int filmId) {
-        String sql = "SELECT title, overview, release_date, poster_url, api_rating, rating FROM film WHERE id = ?";
         Map<String, Object> movieDetails = new HashMap<>();
-
-        try (Connection conn = ConnectionManager.getInstance().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, filmId);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    movieDetails.put("title", rs.getString("title"));
-                    movieDetails.put("overview", rs.getString("overview"));
-                    movieDetails.put("release_date", rs.getDate("release_date").toString());
-                    movieDetails.put("poster_url", rs.getString("poster_url"));
-                    movieDetails.put("api_rating", rs.getObject("api_rating")); // Может быть null
-                    movieDetails.put("rating", rs.getObject("rating")); // Может быть null
-                    logger.info("Fetched film details: " +  rs.getObject("rating"));
-                }
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Film film = session.get(Film.class, filmId);
+            if (film != null) {
+                movieDetails.put("title", film.getTitle());
+                movieDetails.put("overview", film.getOverview());
+                movieDetails.put("release_date", film.getReleaseDate());
+                movieDetails.put("poster_url", film.getPosterUrl());
+                movieDetails.put("api_rating", film.getApiRating());
+                movieDetails.put("rating", film.getRating());
             }
-        } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Error retrieving movie details for film ID: " + filmId, e);
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error fetching film details by ID: " + filmId, e);
         }
         return movieDetails;
     }
 
-    public boolean updateFilmRatingAndCount(int filmId, int newRating, boolean isUpdate) {
-        String updateQuery;
-        if (isUpdate) {
-            updateQuery = """
-            UPDATE film
-            SET rating = (rating * count + ?) / count
-            WHERE id = ?
-        """;
-        } else {
-            updateQuery = """
-            UPDATE film
-            SET rating = (rating * count + ?) / (count + 1),
-                count = count + 1
-            WHERE id = ?
-        """;
-        }
-
-        logger.info("Updating film: filmId=" + filmId + ", newRating=" + newRating + ", isUpdate=" + isUpdate);
-
-        try (Connection conn = ConnectionManager.getInstance().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(updateQuery)) {
-
-            stmt.setInt(1, newRating);
-            stmt.setInt(2, filmId);
-
-            logger.info("Executing query: " + updateQuery);
-            logger.info("Query parameters: newRating=" + newRating + ", filmId=" + filmId);
-
-            int rowsUpdated = stmt.executeUpdate();
-            if (rowsUpdated > 0) {
-                logger.info("Successfully updated film rating and count. Rows updated: " + rowsUpdated);
-                return true;
-            } else {
-                logger.warning("No rows were updated for film ID: " + filmId);
-            }
-        } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Error updating film rating and count for film ID: " + filmId, e);
-        }
-        return false;
-    }
-
-    public void testUpdateFilmRatingAndCount() {
-        int testFilmId = 1; // Замените на существующий ID фильма
-        int newRating = 8;
-        boolean isUpdate = false; // Используйте true для обновления рейтинга
-
-        boolean result = getInstance().updateFilmRatingAndCount(testFilmId, newRating, isUpdate);
-
-        if (result) {
-            logger.info("Test passed: Film rating and count updated successfully.");
-        } else {
-            logger.warning("Test failed: Film rating and count were not updated.");
-        }
-    }
-
     public boolean updateFilmRatingAndCount(int filmId) {
-        String avgSql = "SELECT AVG(rating) as avg_rating, COUNT(*) as cnt FROM reviews WHERE film_id = ?";
-        String updateFilmSql = "UPDATE film SET rating = ?, count = ? WHERE id = ?";
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Transaction transaction = session.beginTransaction();
 
-        try (Connection conn = ConnectionManager.getInstance().getConnection();
-             PreparedStatement avgStmt = conn.prepareStatement(avgSql);
-             PreparedStatement updateStmt = conn.prepareStatement(updateFilmSql)) {
+            // Получаем все отзывы для фильма
+            List<Integer> ratings = session.createQuery(
+                            "select r.rating from Review r where r.filmId = :filmId", Integer.class)
+                    .setParameter("filmId", filmId)
+                    .getResultList();
 
-            avgStmt.setInt(1, filmId);
+            // Рассчитываем новый рейтинг и количество отзывов
             double avgRating = 0.0;
-            int count = 0;
+            int count = ratings.size();
 
-            try (ResultSet rs = avgStmt.executeQuery()) {
-                if (rs.next()) {
-                    avgRating = rs.getDouble("avg_rating");
-                    count = rs.getInt("cnt");
-                }
+            if (count > 0) {
+                avgRating = ratings.stream().mapToInt(Integer::intValue).average().orElse(0.0);
             }
 
-            if (count == 0) {
-                updateStmt.setNull(1, Types.NUMERIC); // Нет отзывов - рейтинг неизвестен
-                updateStmt.setInt(2, 0);
-            } else {
-                double roundedRating = Math.round(avgRating * 10) / 10.0;
-                updateStmt.setDouble(1, roundedRating);
-                updateStmt.setInt(2, count);
+            // Округляем рейтинг до одного знака после запятой
+            avgRating = Math.round(avgRating * 10) / 10.0;
+
+            // Обновляем фильм
+            Film film = session.get(Film.class, filmId);
+            if (film == null) {
+                logger.warning("Film not found for ID: " + filmId);
+                return false;
             }
 
-            updateStmt.setInt(3, filmId);
-            int rows = updateStmt.executeUpdate();
-            return rows > 0;
-        } catch (SQLException e) {
-            Logger.getLogger(FilmService.class.getName()).log(Level.SEVERE, "Error updating film rating", e);
+            film.setRating(count > 0 ? avgRating : null); // Если отзывов нет, рейтинг остаётся null
+            film.setCount(count);
+
+            session.update(film);
+            transaction.commit();
+
+            logger.info("Updated film rating and count: filmId=" + filmId + ", newRating=" + avgRating + ", count=" + count);
+            return true;
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error updating film rating and count for film ID: " + filmId, e);
+            return false;
         }
-        return false;
     }
+
 
     public FilmDTO getFilmDTOById(int id) {
-        Film film = filmDAO.getFilmById(id);
-        if (film == null) {
-            throw new IllegalArgumentException("Film not found with ID: " + id);
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Film film = session.get(Film.class, id);
+            if (film == null) {
+                throw new IllegalArgumentException("Film not found with ID: " + id);
+            }
+            return FilmMapper.toDTO(film);
         }
-        return FilmMapper.toDTO(film);
     }
 }

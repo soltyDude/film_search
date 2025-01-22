@@ -5,6 +5,7 @@ import com.example.kino_search.db.FilmService;
 import com.example.kino_search.db.dao.ReviewDAO;
 import com.example.kino_search.db.dao.PlaylistDAO;
 
+import com.example.kino_search.model.Review;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -60,7 +61,7 @@ public class MovieDetailsServlet extends HttpServlet {
             }
 
             // Получаем список отзывов
-            List<Map<String, Object>> reviews = ReviewDAO.getInstance().getReviewsByFilmId(filmId);
+            List<Review> reviews = ReviewDAO.getInstance().getReviewsByFilmId(filmId);
 
             // Передаем данные фильма на JSP
             request.setAttribute("title", movieDetails.get("title"));

@@ -22,7 +22,7 @@ public class UpdateRatingTest {
 
         // Тестируем обновление рейтинга и количества
         boolean isUpdate = false; // Установите true для проверки обновления
-        boolean result = FilmService.getInstance().updateFilmRatingAndCount(testFilmId, newRating, isUpdate);
+        boolean result = FilmService.getInstance().updateFilmRatingAndCount(testFilmId);
 
         if (result) {
             logger.info("Test passed: Film rating and count updated successfully.");

@@ -8,9 +8,6 @@
         <property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
 
 
-        <!-- Диалект для PostgreSQL -->
-        <property name="hibernate.dialect">org.hibernate.dialect.PostgreSQL95Dialect</property>
-
         <!-- Логирование запросов -->
         <property name="hibernate.show_sql">true</property>
         <property name="hibernate.format_sql">true</property>
@@ -25,5 +22,8 @@
         <!-- Укажите классы сущностей -->
         <mapping class="com.example.kino_search.model.Film"/>
         <mapping class="com.example.kino_search.model.Genre"/>
+        <mapping class="com.example.kino_search.model.Review"/>
+        <mapping class="com.example.kino_search.model.ViewedMovie"/>
+
     </session-factory>
 </hibernate-configuration>

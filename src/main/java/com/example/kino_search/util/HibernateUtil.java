@@ -23,17 +23,16 @@ public class HibernateUtil {
             // Adding annotated classes
             configuration.addAnnotatedClass(com.example.kino_search.model.Genre.class);
             configuration.addAnnotatedClass(com.example.kino_search.model.Film.class);
+            configuration.addAnnotatedClass(com.example.kino_search.model.ViewedMovie.class);
+            configuration.addAnnotatedClass(com.example.kino_search.model.Review.class);
 
-            System.out.println("--------------Added entity: " + com.example.kino_search.model.Genre.class.getName());
 
             // Create SessionFactory
             sessionFactory = configuration.buildSessionFactory();
 
             // Log annotated entities
             sessionFactory.getMetamodel().getEntities().forEach(entityType -> {
-                System.out.println("-------start");
                 System.out.println("Annotated entity: " + entityType.getJavaType().getName());
-                System.out.println("-------end");
             });
 
         } catch (Throwable ex) {

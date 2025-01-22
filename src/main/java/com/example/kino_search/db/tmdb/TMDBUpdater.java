@@ -63,7 +63,7 @@ public class TMDBUpdater {
         film.setApiCount(apiCount);
 
         // Устанавливаем значения rating и count только для новых фильмов
-        film.setRating(apiRating);
+        film.setRating((double) apiRating);
         film.setCount(0); // Устанавливаем начальное значение 0 для новых фильмов
 
         if (!filmJson.get("overview").isJsonNull()) {

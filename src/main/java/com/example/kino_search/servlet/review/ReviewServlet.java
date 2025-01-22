@@ -27,6 +27,9 @@ public class ReviewServlet extends HttpServlet {
 
             logger.info("Received review: userId=" + userId + ", filmAPIId=" + filmAPIId + ", rating=" + rating);
 
+            // Убедитесь, что фильм существует в базе
+            FilmService.getInstance().fetchAndSaveFilm(filmAPIId);
+
             int filmId = FilmService.getInstance().getFilmIdByApiId(filmAPIId);
 
             // Проверяем, существует ли фильм в просмотренных, если нет - добавляем
@@ -42,7 +45,7 @@ public class ReviewServlet extends HttpServlet {
                 success = ReviewDAO.getInstance().updateReview(userId, filmId, rating, reviewText);
                 logger.info("Review updated: " + success);
             } else {
-                success = ReviewDAO.getInstance().addReview(userId, filmAPIId, rating, reviewText);
+                success = ReviewDAO.getInstance().addReview(userId, filmId, rating, reviewText);
                 logger.info("Review added: " + success);
             }
 
@@ -64,4 +67,5 @@ public class ReviewServlet extends HttpServlet {
             request.getRequestDispatcher("error.jsp").forward(request, response);
         }
     }
+
 }

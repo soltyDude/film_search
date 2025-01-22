@@ -1,6 +1,6 @@
 <%@ page import="com.example.kino_search.db.FilmService" %>
 <%@ page import="com.example.kino_search.db.dao.ReviewDAO" %>
-<%@ page import="java.util.Map" %>
+<%@ page import="com.example.kino_search.model.Review" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%
     Integer userId = null;
@@ -21,13 +21,13 @@
     }
 
     int filmId = FilmService.getInstance().getFilmIdByApiId(apiId);
-    Map<String, Object> existingReview = ReviewDAO.getInstance().getReviewByUserAndFilm(userId, filmId);
+    Review existingReview = ReviewDAO.getInstance().getReviewByUserAndFilm(userId, filmId);
 
     Integer existingRating = null;
     String existingReviewText = "";
     if (existingReview != null) {
-        existingRating = (Integer) existingReview.get("rating");
-        existingReviewText = (String) existingReview.get("review_text");
+        existingRating = existingReview.getRating();
+        existingReviewText = existingReview.getReviewText();
     }
 %>
 <!DOCTYPE html>
@@ -114,7 +114,7 @@
         <button type="submit"><%= (existingReview != null) ? "Update Review" : "Add Review" %></button>
     </form>
     <div class="back-link">
-        <a href="whatched">Back to Viewed Movies</a>
+        <a href="watched">Back to Viewed Movies</a>
     </div>
 </div>
 </body>
