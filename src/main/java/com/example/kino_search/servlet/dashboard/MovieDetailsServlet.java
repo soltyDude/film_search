@@ -5,6 +5,7 @@ import com.example.kino_search.db.FilmService;
 import com.example.kino_search.db.dao.ReviewDAO;
 import com.example.kino_search.db.dao.PlaylistDAO;
 
+import com.example.kino_search.model.Playlist;
 import com.example.kino_search.model.Review;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -78,7 +79,7 @@ public class MovieDetailsServlet extends HttpServlet {
             request.setAttribute("internalRating", movieDetails.get("rating") != null ? movieDetails.get("rating") : "N/A");
 
             // Получаем список плейлистов пользователя
-            List<Map<String, Object>> playlists = PlaylistDAO.getInstance().getPlaylistsByUserId(userId);
+            List<Playlist> playlists = PlaylistDAO.getInstance().getPlaylistsByUserId(userId);
             request.setAttribute("playlists", playlists);
 
             System.out.println(movieDetails.get("api_rating").toString());

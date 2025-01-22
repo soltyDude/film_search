@@ -1,6 +1,9 @@
 package com.example.kino_search.servlet.playlists;
 
 import com.example.kino_search.db.dao.PlaylistDAO;
+import com.example.kino_search.model.Film;
+import com.example.kino_search.model.Playlist;
+import com.example.kino_search.model.PlaylistFilm;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -8,8 +11,8 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class ViewPlaylistServlet extends HttpServlet {
 
@@ -28,22 +31,24 @@ public class ViewPlaylistServlet extends HttpServlet {
             int playlistId = Integer.parseInt(playlistIdParam);
 
             // Получаем детали плейлиста и фильмы
-            Map<String, Object> playlistDetails = PlaylistDAO.getInstance().getPlaylistDetails(playlistId);
+            Playlist playlistDetails = PlaylistDAO.getInstance().getPlaylistDetails(playlistId);
 
-            if (playlistDetails == null || playlistDetails.isEmpty()) {
+            if (playlistDetails == null) {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND, "Playlist not found.");
                 return;
             }
 
-//            List<Map<String,Object>> films = (List<Map<String,Object>>) playlistDetails.get("films");
-//            for (Map<String,Object> f : films) {
-//                System.out.println("Film data: " + f);
-//            }
+            // Преобразуем список PlaylistFilm в список Film
+            List<Film> films = playlistDetails.getPlaylistFilms()
+                    .stream()
+                    .map(PlaylistFilm::getFilm)
+                    .collect(Collectors.toList());
 
-            // Передаём данные плейлиста в JSP
-            request.setAttribute("playlistId", playlistId); // Добавлено
-            request.setAttribute("playlistName", playlistDetails.get("name"));
-            request.setAttribute("films", playlistDetails.get("films"));
+            // Передаём данные плейлиста и фильмы в JSP
+            request.setAttribute("playlistId", playlistId);
+            request.setAttribute("playlistName", playlistDetails.getName());
+            request.setAttribute("films", films);
+
             request.getRequestDispatcher("viewPlaylist.jsp").forward(request, response);
         } catch (NumberFormatException e) {
             logger.severe("Invalid playlist ID format: " + playlistIdParam);

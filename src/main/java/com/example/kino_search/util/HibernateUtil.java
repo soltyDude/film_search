@@ -25,6 +25,8 @@ public class HibernateUtil {
             configuration.addAnnotatedClass(com.example.kino_search.model.Film.class);
             configuration.addAnnotatedClass(com.example.kino_search.model.ViewedMovie.class);
             configuration.addAnnotatedClass(com.example.kino_search.model.Review.class);
+            configuration.addAnnotatedClass(com.example.kino_search.model.PlaylistFilm.class);
+            configuration.addAnnotatedClass(com.example.kino_search.model.Playlist.class);
 
 
             // Create SessionFactory

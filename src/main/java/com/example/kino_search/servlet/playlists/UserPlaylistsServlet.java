@@ -1,5 +1,6 @@
 package com.example.kino_search.servlet.playlists;
 
+import com.example.kino_search.model.Playlist;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,7 +31,7 @@ public class UserPlaylistsServlet extends HttpServlet {
 
         try {
             // Получаем плейлисты пользователя из базы данных
-            List<Map<String, Object>> playlists = PlaylistDAO.getInstance().getPlaylistsByUserId(userId);
+            List<Playlist> playlists = PlaylistDAO.getInstance().getPlaylistsByUserId(userId);
             logger.info("Found " + playlists.size() + " playlists");
 
             // Передаем данные в JSP

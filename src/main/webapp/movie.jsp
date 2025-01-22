@@ -1,6 +1,7 @@
 <%@ page import="com.example.kino_search.model.Review" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="com.example.kino_search.model.Playlist" %>
 <%@ page session="true" %>
 <!DOCTYPE html>
 <html lang="en">
@@ -147,11 +148,11 @@
       <input type="hidden" name="apiId" value="<%= request.getAttribute("apiId") %>">
       <select name="playlistId" required>
         <%
-          List<Map<String, Object>> playlists = (List<Map<String, Object>>) request.getAttribute("playlists");
+          List<Playlist> playlists = (List<Playlist>) request.getAttribute("playlists");
           if (playlists != null) {
-            for (Map<String, Object> playlist : playlists) {
+            for (Playlist playlist : playlists) {
         %>
-        <option value="<%= playlist.get("id") %>"><%= playlist.get("name") %></option>
+        <option value="<%= playlist.getId() %>"><%= playlist.getName() %></option>
         <%
             }
           }

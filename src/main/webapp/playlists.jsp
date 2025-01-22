@@ -1,5 +1,6 @@
 <%@ page session="true" %>
 <%@ page import="java.util.*" %>
+<%@ page import="com.example.kino_search.model.Playlist" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -89,19 +90,19 @@
     </div>
 
     <%
-        List<Map<String, Object>> playlists = (List<Map<String, Object>>) request.getAttribute("playlists");
+        List<Playlist> playlists = (List<Playlist>) request.getAttribute("playlists");
         if (playlists == null || playlists.isEmpty()) {
     %>
     <p>You don't have any playlists yet.</p>
     <%
     } else {
-        for (Map<String, Object> playlist : playlists) {
+        for (Playlist playlist : playlists) {
     %>
     <div class="playlist">
-        <h2><%= playlist.get("name") %></h2>
-        <p><strong>Created:</strong> <%= playlist.get("created_at") %></p>
-        <p><strong>Updated:</strong> <%= playlist.get("updated_at") %></p>
-        <a href="viewPlaylist?id=<%= playlist.get("id") %>" class="view-btn">View Playlist</a>
+        <h2><%= playlist.getName() %></h2>
+        <p><strong>Created:</strong> <%= playlist.getCreatedAt() %></p>
+        <p><strong>Updated:</strong> <%= playlist.getUpdatedAt() %></p>
+        <a href="viewPlaylist?id=<%= playlist.getId() %>" class="view-btn">View Playlist</a>
     </div>
     <%
             }

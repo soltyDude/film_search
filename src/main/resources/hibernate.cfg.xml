@@ -24,6 +24,9 @@
         <mapping class="com.example.kino_search.model.Genre"/>
         <mapping class="com.example.kino_search.model.Review"/>
         <mapping class="com.example.kino_search.model.ViewedMovie"/>
+        <mapping class="com.example.kino_search.model.Playlist"/>
+        <mapping class="com.example.kino_search.model.PlaylistFilm"/>
+
 
     </session-factory>
 </hibernate-configuration>

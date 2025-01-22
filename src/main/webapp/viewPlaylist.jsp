@@ -1,5 +1,5 @@
-<%@ page import="java.util.Map" %>
 <%@ page import="java.util.List" %>
+<%@ page import="com.example.kino_search.model.Film" %>
 <%@ page session="true" %>
 <!DOCTYPE html>
 <html lang="en">
@@ -61,25 +61,24 @@
 </head>
 <body>
 <div class="container">
-    <h1>Playlist: <%= request.getAttribute("playlistName") %></h1>
+    <h1>Playlist: <%= request.getAttribute("playlistName") != null ? request.getAttribute("playlistName") : "Unknown" %></h1>
     <div class="movie-list">
         <%
-            List<Map<String, Object>> films = (List<Map<String, Object>>) request.getAttribute("films");
+            List<Film> films = (List<Film>) request.getAttribute("films");
             if (films != null && !films.isEmpty()) {
-                for (Map<String, Object> film : films) {
+                for (Film film : films) {
         %>
         <div class="movie-item">
-            <a href="movie?id=<%= film.get("apiId") %>">
-                <img src="<%= film.get("poster_url") %>" alt="<%= film.get("title") %>">
+            <a href="movie?id=<%= film.getApiId() %>">
+                <img src="<%= film.getPosterUrl() %>" alt="<%= film.getTitle() %>">
             </a>
-            <h3><%= film.get("title") %></h3>
+            <h3><%= film.getTitle() %></h3>
             <form action="<%= request.getContextPath() %>/removeFilmFromPlaylist" method="post">
                 <input type="hidden" name="playlistId" value="<%= request.getAttribute("playlistId") %>">
-                <input type="hidden" name="apiId" value="<%= film.get("apiId") %>">
-                <button type="submit" style="background-color: #dc3545; color: #fff; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Remove</button>
+                <input type="hidden" name="apiId" value="<%= film.getApiId() %>">
+                <button type="submit" class="remove-btn">Remove</button>
             </form>
         </div>
-
         <%
             }
         } else {

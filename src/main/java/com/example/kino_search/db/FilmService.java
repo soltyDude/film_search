@@ -37,14 +37,15 @@ public class FilmService {
         return instance;
     }
 
-    public void fetchAndSaveFilm(int apiId) {
+    public Film fetchAndSaveFilm(int apiId) {
         logger.info("Fetching and saving film with API ID: " + apiId);
 
+        Film film = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             Transaction transaction = session.beginTransaction();
 
             // Проверяем, существует ли фильм в базе
-            Film film = session.createQuery("from Film where apiId = :apiId", Film.class)
+            film = session.createQuery("from Film where apiId = :apiId", Film.class)
                     .setParameter("apiId", apiId)
                     .uniqueResult();
 
@@ -65,6 +66,7 @@ public class FilmService {
 
             session.saveOrUpdate(film);
 
+
             JsonArray genres = movieDetails.getAsJsonArray("genres");
             for (int i = 0; i < genres.size(); i++) {
                 JsonObject genreObj = genres.get(i).getAsJsonObject();
@@ -78,6 +80,7 @@ public class FilmService {
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error while saving film with API ID: " + apiId, e);
         }
+        return film;
     }
 
     public String getFilmTitleByID(int id) {
