@@ -26,6 +26,7 @@
         <mapping class="com.example.kino_search.model.ViewedMovie"/>
         <mapping class="com.example.kino_search.model.Playlist"/>
         <mapping class="com.example.kino_search.model.PlaylistFilm"/>
+        <mapping class="com.example.kino_search.model.User"/>
 
 
     </session-factory>

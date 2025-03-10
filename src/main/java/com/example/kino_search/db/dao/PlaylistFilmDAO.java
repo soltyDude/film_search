@@ -29,41 +29,37 @@ public class PlaylistFilmDAO {
         return instance;
     }
 
-    // Добавление фильма в плейлист
     public boolean addFilmToPlaylist(int playlistId, int filmId) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             Transaction transaction = session.beginTransaction();
 
-            // Убедиться, что фильм существует
-            Film film = FilmService.getInstance().fetchAndSaveFilm(filmId);
-
-
-            if (film == null) {
-                logger.warning("Film with ID " + filmId + " does not exist.");
-                return false;
-            }
-
-            // Получить плейлист
+            // Получаем плейлист и фильм за один запрос
             Playlist playlist = session.get(Playlist.class, playlistId);
             if (playlist == null) {
                 logger.warning("Playlist with ID " + playlistId + " does not exist.");
                 return false;
             }
 
-            // Проверить, не существует ли уже связь между плейлистом и фильмом
-            PlaylistFilm playlistFilm = session.createQuery(
-                            "FROM PlaylistFilm WHERE playlist.id = :playlistId AND film.id = :filmId", PlaylistFilm.class)
+            Film film = session.get(Film.class, filmId);
+            if (film == null) {
+                logger.warning("Film with ID " + filmId + " does not exist.");
+                return false;
+            }
+
+            // Проверяем существование связи
+            boolean relationExists = session.createQuery(
+                            "SELECT count(pf) FROM PlaylistFilm pf WHERE pf.playlist.id = :playlistId AND pf.film.id = :filmId", Long.class)
                     .setParameter("playlistId", playlistId)
                     .setParameter("filmId", filmId)
-                    .uniqueResult();
+                    .uniqueResult() > 0;
 
-            if (playlistFilm != null) {
+            if (relationExists) {
                 logger.info("Film already exists in playlist: Playlist ID = " + playlistId + ", Film ID = " + filmId);
                 return false;
             }
 
-            // Добавить фильм в плейлист
-            playlistFilm = new PlaylistFilm();
+            // Создаем связь и сохраняем
+            PlaylistFilm playlistFilm = new PlaylistFilm();
             playlistFilm.setPlaylist(playlist);
             playlistFilm.setFilm(film);
 
@@ -78,30 +74,29 @@ public class PlaylistFilmDAO {
         }
     }
 
-    // Удаление фильма из плейлиста
     public boolean removeFilmFromPlaylist(int playlistId, int filmId) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             Transaction transaction = session.beginTransaction();
 
-            PlaylistFilm playlistFilm = session.createQuery(
-                            "FROM PlaylistFilm WHERE playlist.id = :playlistId AND film.id = :filmId", PlaylistFilm.class)
+            int rowsDeleted = session.createQuery(
+                            "DELETE FROM PlaylistFilm WHERE playlist.id = :playlistId AND film.id = :filmId")
                     .setParameter("playlistId", playlistId)
                     .setParameter("filmId", filmId)
-                    .uniqueResult();
+                    .executeUpdate();
 
-            if (playlistFilm == null) {
+            transaction.commit();
+
+            if (rowsDeleted > 0) {
+                logger.info("Film removed from playlist: Playlist ID = " + playlistId + ", Film ID = " + filmId);
+                return true;
+            } else {
                 logger.info("No film found to remove from playlist: Playlist ID = " + playlistId + ", Film ID = " + filmId);
                 return false;
             }
-
-            session.delete(playlistFilm);
-            transaction.commit();
-
-            logger.info("Film removed from playlist: Playlist ID = " + playlistId + ", Film ID = " + filmId);
-            return true;
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error removing film from playlist", e);
             return false;
         }
     }
+
 }

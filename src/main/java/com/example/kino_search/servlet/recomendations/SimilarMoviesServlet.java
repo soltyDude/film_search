@@ -1,5 +1,7 @@
 package com.example.kino_search.servlet.recomendations;
 
+import com.example.kino_search.db.FilmService;
+import com.example.kino_search.model.Film;
 import com.example.kino_search.util.TMDBApiUtil;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -21,40 +23,41 @@ public class SimilarMoviesServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String apiId = request.getParameter("apiId");
+        String pageParam = request.getParameter("page");
+        String sizeParam = request.getParameter("size");
 
         if (apiId == null || apiId.trim().isEmpty()) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid movie ID.");
             return;
         }
 
+        // Установка значений для пагинации
+        int page = pageParam != null ? Integer.parseInt(pageParam) : 1; // По умолчанию первая страница
+        int size = sizeParam != null ? Integer.parseInt(sizeParam) : 10; // По умолчанию 10 записей
+
         try {
-            // Fetch similar movies from TMDB API
-            String endpoint = "/movie/" + apiId + "/similar";
-            JsonObject jsonResponse = TMDBApiUtil.sendRequest(endpoint);
+            // Получение фильмов с пагинацией
+            List<Film> paginatedFilms = FilmService.getInstance().getPaginatedFilms(page, size);
 
+            // Преобразование фильмов в формат для JSP
             List<Map<String, String>> similarMovies = new ArrayList<>();
-            JsonArray results = jsonResponse.getAsJsonArray("results");
-
-            for (int i = 0; i < results.size(); i++) {
-                JsonObject movieJson = results.get(i).getAsJsonObject();
-
-                Map<String, String> movie = new HashMap<>();
-                movie.put("id", movieJson.get("id").getAsString());
-                movie.put("title", movieJson.get("title").getAsString());
-
-                if (movieJson.has("poster_path") && !movieJson.get("poster_path").isJsonNull()) {
-                    movie.put("poster_url", IMAGE_BASE_URL + movieJson.get("poster_path").getAsString());
-                    similarMovies.add(movie);
-                }
+            for (Film film : paginatedFilms) {
+                Map<String, String> movieData = new HashMap<>();
+                movieData.put("id", String.valueOf(film.getApiId()));
+                movieData.put("title", film.getTitle());
+                movieData.put("poster_url", film.getPosterUrl());
+                similarMovies.add(movieData);
             }
 
-            // Forward the data to JSP
+            // Передача данных в JSP
             request.setAttribute("similarMovies", similarMovies);
+            request.setAttribute("currentPage", page);
+            request.setAttribute("pageSize", size);
             request.getRequestDispatcher("similarMovies.jsp").forward(request, response);
-
         } catch (Exception e) {
             e.printStackTrace();
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to fetch similar movies.");
         }
     }
+
 }

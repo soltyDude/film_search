@@ -2,6 +2,9 @@ package com.example.kino_search.db.dao;
 
 import com.example.kino_search.model.Film;
 import com.example.kino_search.util.HibernateUtil;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -34,11 +37,13 @@ public class FilmDAO {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             Transaction transaction = session.beginTransaction();
 
-            // Проверяем существование объекта
-            Film existingFilm = session.createQuery(
-                            "FROM Film WHERE apiId = :apiId", Film.class)
-                    .setParameter("apiId", film.getApiId())
-                    .uniqueResult();
+            // Проверяем существование объекта через JPA Criteria API
+            CriteriaBuilder builder = session.getCriteriaBuilder();
+            CriteriaQuery<Film> query = builder.createQuery(Film.class);
+            Root<Film> root = query.from(Film.class);
+            query.select(root).where(builder.equal(root.get("apiId"), film.getApiId()));
+
+            Film existingFilm = session.createQuery(query).uniqueResult();
 
             if (existingFilm != null) {
                 film.setId(existingFilm.getId()); // Устанавливаем ID существующего объекта
@@ -49,7 +54,7 @@ public class FilmDAO {
 
             transaction.commit();
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Error saving or updating film: " + film.getTitle(), e);
+            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Error saving or updating film: " + film.getTitle(), e);
         }
     }
 
@@ -88,4 +93,26 @@ public class FilmDAO {
         }
         return null;
     }
+
+    public List<Film> getFilmsPaginated(int page, int size) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            // Создаем CriteriaBuilder для построения запросов
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Film> query = cb.createQuery(Film.class);
+            Root<Film> root = query.from(Film.class);
+
+            // Строим запрос: выбор всех фильмов
+            query.select(root);
+
+            // Добавляем пагинацию
+            return session.createQuery(query)
+                    .setFirstResult((page - 1) * size) // Начало выборки
+                    .setMaxResults(size) // Количество записей
+                    .getResultList();
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error fetching paginated films", e);
+            return List.of(); // Возвращаем пустой список в случае ошибки
+        }
+    }
+
 }

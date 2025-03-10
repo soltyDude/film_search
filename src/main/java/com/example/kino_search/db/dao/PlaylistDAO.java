@@ -117,7 +117,7 @@ public class PlaylistDAO {
         }
     }
 
-    public Playlist getPlaylistDetails(int playlistId, String sortBy) {
+    public Playlist getPlaylistDetails(int playlistId) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             CriteriaBuilder cb = session.getCriteriaBuilder();
             CriteriaQuery<Playlist> query = cb.createQuery(Playlist.class);
@@ -129,10 +129,8 @@ public class PlaylistDAO {
             query.select(playlistRoot)
                     .where(cb.equal(playlistRoot.get("id"), playlistId));
 
-            // Динамическая сортировка
-            if (sortBy != null && !sortBy.isEmpty()) {
-                query.orderBy(cb.asc(playlistRoot.join("playlistFilms").join("film").get(sortBy)));
-            }
+            // Hardcoded sorting by "title" of the associated films
+            query.orderBy(cb.asc(playlistRoot.join("playlistFilms").join("film").get("title")));
 
             return session.createQuery(query).uniqueResult();
         } catch (Exception e) {
@@ -140,6 +138,25 @@ public class PlaylistDAO {
             return null;
         }
     }
+
+    public List<Playlist> getPlaylistsByUserIdPaginated(int userId, int page, int size) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            CriteriaBuilder cb = session.getCriteriaBuilder();
+            CriteriaQuery<Playlist> query = cb.createQuery(Playlist.class);
+            Root<Playlist> root = query.from(Playlist.class);
+            query.select(root).where(cb.equal(root.get("userId"), userId));
+
+            return session.createQuery(query)
+                    .setFirstResult((page - 1) * size)
+                    .setMaxResults(size)
+                    .getResultList();
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error fetching paginated playlists", e);
+            return List.of();
+        }
+    }
+
+
 
 
 

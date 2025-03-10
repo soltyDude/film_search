@@ -1,14 +1,13 @@
-# Используем официальный образ Tomcat
-FROM tomcat:10.1-jdk17
+FROM openjdk:20-slim
 
-# Установка рабочей директории в контейнере
-RUN rm -rf /usr/local/tomcat/webapps/ROOT
+WORKDIR /app
 
-# Копируем ваш WAR-файл в директорию веб-приложений Tomcat
-COPY target/kino_search-1.0-SNAPSHOT.war /usr/local/tomcat/webapps/ROOT.war
+# Устанавливаем необходимые утилиты
+RUN apt-get update && apt-get install -y unzip
 
-# Указываем порт, который будет слушать Tomcat
-EXPOSE 8080
+# Копируем WAR файл и разархивируем его
+COPY target/kino_search-1.0-SNAPSHOT.war /app/kino_search.war
+RUN mkdir /app/classes && unzip /app/kino_search.war -d /app/classes
 
-# Запускаем Tomcat
-CMD ["catalina.sh", "run"]
+# Указываем точку входа для выполнения HibernateTest
+ENTRYPOINT ["java", "-cp", "/app/classes/WEB-INF/classes:/app/classes/WEB-INF/lib/*:/app/postgresql-42.6.0.jar", "com.example.kino_search.testeClaces.HibernateTest"]

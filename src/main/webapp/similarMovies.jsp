@@ -37,6 +37,24 @@
             font-size: 16px;
             margin: 10px 0 5px;
         }
+        .pagination {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        .pagination a {
+            text-decoration: none;
+            color: #007BFF;
+            border: 1px solid #007BFF;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        .pagination a:hover {
+            background-color: #007BFF;
+            color: #fff;
+        }
     </style>
 </head>
 <body>
@@ -44,7 +62,11 @@
     <h1>Similar Movies</h1>
     <div class="movie-list">
         <%
+            // Получение списка фильмов и текущей страницы из request
             List<Map<String, String>> similarMovies = (List<Map<String, String>>) request.getAttribute("similarMovies");
+            int currentPage = (int) request.getAttribute("currentPage");
+            int pageSize = (int) request.getAttribute("pageSize");
+
             if (similarMovies != null && !similarMovies.isEmpty()) {
                 for (Map<String, String> movie : similarMovies) {
         %>
@@ -62,6 +84,17 @@
         <%
             }
         %>
+    </div>
+    <div class="pagination">
+        <%
+            // Вычисление предыдущей и следующей страницы
+            int prevPage = currentPage > 1 ? currentPage - 1 : 1;
+            int nextPage = currentPage + 1;
+
+            // Генерация ссылок для пагинации
+        %>
+        <a href="similarMovies.jsp?page=<%= prevPage %>&size=<%= pageSize %>">Previous</a>
+        <a href="similarMovies.jsp?page=<%= nextPage %>&size=<%= pageSize %>">Next</a>
     </div>
 </div>
 </body>

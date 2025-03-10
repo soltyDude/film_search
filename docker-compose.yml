@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   db:
     image: postgres:15-alpine
@@ -16,6 +18,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - app-network
     restart: always
 
   tomcat:
@@ -27,7 +31,29 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - app-network
     restart: always
+
+  hibernate-test:
+    build:
+      context: .
+      dockerfile: Dockerfile-hibernate-test
+    container_name: hibernate_test_container
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app-network
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/mydb
+      DB_USERNAME: myuser
+      DB_PASSWORD: mypassword
+    restart: "no"
 
 volumes:
   db-data:
+
+networks:
+  app-network:
+    driver: bridge

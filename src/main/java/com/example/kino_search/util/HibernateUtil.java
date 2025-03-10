@@ -11,7 +11,7 @@ public class HibernateUtil {
             Configuration configuration = new Configuration();
 
             // Hibernate settings
-            configuration.setProperty("hibernate.connection.driver_class", "org.postgresql.Driver");
+//            configuration.setProperty("hibernate.connection.driver_class", "org.postgresql.Driver");
             configuration.setProperty("hibernate.connection.url", "jdbc:postgresql://localhost:5432/moviefinder");
             configuration.setProperty("hibernate.connection.username", "postgres");
             configuration.setProperty("hibernate.connection.password", "qwerty1234");
@@ -27,6 +27,7 @@ public class HibernateUtil {
             configuration.addAnnotatedClass(com.example.kino_search.model.Review.class);
             configuration.addAnnotatedClass(com.example.kino_search.model.PlaylistFilm.class);
             configuration.addAnnotatedClass(com.example.kino_search.model.Playlist.class);
+            configuration.addAnnotatedClass(com.example.kino_search.model.User.class);
 
 
             // Create SessionFactory

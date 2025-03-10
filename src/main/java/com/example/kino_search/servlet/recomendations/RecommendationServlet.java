@@ -1,11 +1,13 @@
 package com.example.kino_search.servlet.recomendations;
 
 import com.example.kino_search.db.dao.UserDAO;
+import com.example.kino_search.model.Film;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -24,10 +26,9 @@ public class RecommendationServlet extends HttpServlet {
             }
 
             // Fetch recommendation list through UserDAO
-            List<Map<String, String>> recommendations = UserDAO.getInstance().getRecommendedMovies(userId);
+            List<Map<String, String>> recommendedFilms = UserDAO.getInstance().getRecommendedMovies(userId);
 
-            // Pass the data to JSP
-            request.setAttribute("recommendations", recommendations);
+            request.setAttribute("recommendations", recommendedFilms);
             request.getRequestDispatcher("recommendations.jsp").forward(request, response);
 
         } catch (Exception e) {

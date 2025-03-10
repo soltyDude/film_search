@@ -1,5 +1,6 @@
 package com.example.kino_search.db;
 
+import com.example.kino_search.db.dao.FilmDAO;
 import com.example.kino_search.db.dao.GenreDAO;
 import com.example.kino_search.db.dao.GenreFilmDAO;
 import com.example.kino_search.model.Film;
@@ -175,4 +176,9 @@ public class FilmService {
             return FilmMapper.toDTO(film);
         }
     }
+
+    public List<Film> getPaginatedFilms(int page, int size) {
+        return FilmDAO.getInstance().getFilmsPaginated(page, size);
+    }
+
 }
